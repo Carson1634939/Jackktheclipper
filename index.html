@@ -319,7 +319,7 @@ body {
   left: 50%;
   top: 0;
   transform: translateX(-50%);
-  width: 340px;
+  width: 480px;
   height: 100%;
   background: rgba(20, 20, 26, 0.85);
   border-left: 2px solid rgba(100, 100, 120, 0.3);
@@ -343,7 +343,7 @@ body {
   bottom: 130px;
   left: 50%;
   transform: translateX(-50%);
-  width: 360px;
+  width: 500px;
   height: 6px;
   z-index: 20;
   border-radius: 3px;
@@ -385,7 +385,7 @@ body {
   bottom: 128px;
   left: 50%;
   transform: translateX(-50%);
-  width: 370px;
+  width: 510px;
   height: 10px;
   z-index: 19;
   background: linear-gradient(90deg,
@@ -601,7 +601,7 @@ body {
 /* ============= CARDS ============= */
 .footage-card {
   position: absolute;
-  width: 300px;
+  width: 440px;
   left: 50%;
   transform: translateX(-50%);
   background: #111;
@@ -892,10 +892,10 @@ body {
 
 /* ============= RESPONSIVE ============= */
 @media (max-width: 600px) {
-  #lane { width: 280px; }
-  .footage-card { width: 250px; }
-  #cut-line { width: 300px; }
-  .cut-line-glow { width: 310px; }
+  #lane { width: 340px; }
+  .footage-card { width: 310px; }
+  #cut-line { width: 360px; }
+  .cut-line-glow { width: 370px; }
   #start-screen .title { font-size: 22px; }
   #hud { font-size: 16px; padding: 0 10px; }
   #hud #money { font-size: 20px; min-width: 100px; }
@@ -1227,7 +1227,10 @@ function createCard() {
   const cardHeight = 160 + Math.random() * 20;
   cardEl.style.height = cardHeight + 'px';
 
-  const cwBottom = 8 + Math.random() * 15;
+  // Vary clip window position across the card height for gameplay variety
+  // Ensure the clip window (24px tall) stays within the card bounds with padding
+  const padding = 12;
+  const cwBottom = padding + Math.random() * (cardHeight - 24 - padding * 2);
 
   cardEl.innerHTML = `
     <img class="card-image" src="${imgSrc}" alt="clip footage" draggable="false">
@@ -1548,10 +1551,14 @@ function gameLoop(timestamp) {
     showSpeedWarning();
   }
 
-  // Spawn cards
+  // Spawn cards - only if enough gap from the last card
   if (now - lastSpawnTime > getCurrentSpawnInterval()) {
-    createCard();
-    lastSpawnTime = now;
+    const lastCard = cards[cards.length - 1];
+    const minGap = 40; // minimum pixels between cards
+    if (!lastCard || (lastCard.y > lastCard.height + minGap)) {
+      createCard();
+      lastSpawnTime = now;
+    }
   }
 
   const speed = getCurrentSpeed();
