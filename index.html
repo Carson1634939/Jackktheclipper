@@ -586,9 +586,9 @@ body {
   animation: moneyTick 0.3s ease;
 }
 
-#speed-level {
+#sponsor-hud {
   color: var(--canyon-blue);
-  min-width: 100px;
+  min-width: 120px;
   text-align: center;
 }
 
@@ -840,10 +840,32 @@ body {
   color: var(--dirty-white);
   background: rgba(0,0,0,0.5);
   border: 1px solid rgba(100,100,120,0.3);
-  padding: 20px 30px;
+  padding: 24px 36px;
   line-height: 2;
   margin-bottom: 30px;
-  min-width: 320px;
+  width: 480px;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+#gameover-screen .go-stats .earnings-big {
+  font-size: 52px;
+  color: var(--crown-gold);
+  text-align: center;
+  text-shadow: 0 0 20px rgba(255,215,0,0.4);
+  margin: 8px 0 4px;
+  line-height: 1.2;
+}
+
+#gameover-screen .go-stats .earnings-label {
+  font-size: 18px;
+  color: var(--canyon-blue);
+  text-align: center;
+  opacity: 0.7;
+  letter-spacing: 3px;
 }
 
 #gameover-screen .go-stats .stat-label {
@@ -1070,7 +1092,7 @@ body {
   <div id="hud" style="display:none;">
     <div id="lives"></div>
     <div id="money">👑 $0</div>
-    <div id="speed-level">⚡ LVL 1</div>
+    <div id="sponsor-hud">💰 0 Sponsors</div>
     <div id="streak">🔥 0</div>
   </div>
 
@@ -1282,7 +1304,6 @@ let streak = 0;
 let longestStreak = 0;
 let totalClips = 0;
 let totalMisses = 0;
-let speedLevel = 1;
 let baseSpeed = 3.0; // pixels per frame (faster start)
 let spawnInterval = 1800; // ms between spawns
 let lastSpawnTime = 0;
@@ -1363,7 +1384,7 @@ const lane = document.getElementById('lane');
 const hud = document.getElementById('hud');
 const livesEl = document.getElementById('lives');
 const moneyEl = document.getElementById('money');
-const speedEl = document.getElementById('speed-level');
+const sponsorHudEl = document.getElementById('sponsor-hud');
 const streakEl = document.getElementById('streak');
 const startScreen = document.getElementById('start-screen');
 const gameoverScreen = document.getElementById('gameover-screen');
@@ -1467,8 +1488,8 @@ function updateStreak() {
   streakEl.textContent = `🔥 ${streak}`;
 }
 
-function updateSpeed() {
-  speedEl.textContent = `⚡ LVL ${speedLevel}`;
+function updateSponsorHud() {
+  sponsorHudEl.textContent = `💰 ${activeSponsorCount} Sponsor${activeSponsorCount !== 1 ? 's' : ''}`;
 }
 
 // ============= VISUAL EFFECTS =============
@@ -1512,10 +1533,10 @@ function showStreakBonus() {
   setTimeout(() => flash.remove(), 500);
 }
 
-function showSpeedWarning() {
+function showSponsorWarning() {
   const popup = document.createElement('div');
   popup.className = 'speed-popup';
-  popup.textContent = `PICKING UP THE PACE 👑`;
+  popup.textContent = `NEW SPONSOR 💰`;
   container.appendChild(popup);
   setTimeout(() => popup.remove(), 1500);
 }
@@ -1552,15 +1573,15 @@ function jackReact(type) {
 
 // ============= GAME LOGIC =============
 function getCurrentSpeed() {
-  return baseSpeed + (speedLevel - 1) * 0.5;
+  return baseSpeed + activeSponsorCount * 0.5;
 }
 
 function getCurrentSpawnInterval() {
-  return Math.max(400, spawnInterval - (speedLevel - 1) * 200);
+  return Math.max(400, spawnInterval - activeSponsorCount * 200);
 }
 
 function getCurrentMinGap() {
-  return Math.max(8, 40 - (speedLevel - 1) * 5);
+  return Math.max(8, 40 - activeSponsorCount * 5);
 }
 
 function handleClip() {
@@ -1675,15 +1696,12 @@ function gameOver() {
   document.getElementById('go-title').textContent = msg;
 
   document.getElementById('go-stats').innerHTML = `
-    <div><span class="stat-label">TOTAL EARNED</span><span class="stat-value">$${money.toLocaleString()}</span></div>
+    <div class="earnings-label">TOTAL EARNED</div>
+    <div class="earnings-big">$${money.toLocaleString()}</div>
     <hr class="stat-divider">
     <div><span class="stat-label">CLIPS COMPLETED</span><span class="stat-value">${totalClips}</span></div>
     <hr class="stat-divider">
-    <div><span class="stat-label">MISSES</span><span class="stat-value">${totalMisses}</span></div>
-    <hr class="stat-divider">
     <div><span class="stat-label">LONGEST STREAK</span><span class="stat-value">🔥 ${longestStreak}</span></div>
-    <hr class="stat-divider">
-    <div><span class="stat-label">MAX SPEED</span><span class="stat-value">⚡ LVL ${speedLevel}</span></div>
     <hr class="stat-divider">
     <div><span class="stat-label">SPONSORS</span><span class="stat-value">💰 ${activeSponsorCount}</span></div>
   `;
@@ -1704,7 +1722,6 @@ function startGame() {
   longestStreak = 0;
   totalClips = 0;
   totalMisses = 0;
-  speedLevel = 1;
   cards = [];
   lastSpawnTime = 0;
   gameStartTime = performance.now();
@@ -1726,7 +1743,7 @@ function startGame() {
   updateLives();
   updateMoney();
   updateStreak();
-  updateSpeed();
+  updateSponsorHud();
   updateWalletSponsors();
 
   audio.init();
@@ -1740,13 +1757,12 @@ function gameLoop(timestamp) {
 
   const now = timestamp;
 
-  // Speed escalation every 15 seconds
+  // New sponsor every 15 seconds (increases speed + earnings)
   if (now - lastSpeedIncreaseTime > 15000) {
-    speedLevel++;
     lastSpeedIncreaseTime = now;
-    updateSpeed();
-    showSpeedWarning();
-    addSponsor(); // New sponsor each level
+    addSponsor();
+    updateSponsorHud();
+    showSponsorWarning();
   }
 
   // Spawn cards - only if enough gap from the last card
