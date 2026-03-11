@@ -616,8 +616,9 @@ body {
 .card-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  background: #000;
 }
 
 .card-title {
@@ -890,6 +891,105 @@ body {
   transform: translateY(5px);
 }
 
+/* ============= PHANTOM WALLET ============= */
+#phantom-wallet {
+  position: absolute;
+  top: 60px;
+  right: 12px;
+  width: 200px;
+  z-index: 50;
+  font-family: 'VT323', 'Courier New', monospace;
+  pointer-events: none;
+}
+
+.wallet-card {
+  background: linear-gradient(145deg, #1a1028, #0e0a18 40%, #1a0e28);
+  border: 1px solid rgba(148, 100, 255, 0.3);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 24px rgba(100, 50, 200, 0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.wallet-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: rgba(200, 180, 255, 0.7);
+  letter-spacing: 1px;
+}
+
+.wallet-ghost {
+  font-size: 18px;
+  filter: drop-shadow(0 0 6px rgba(148, 100, 255, 0.6));
+}
+
+.wallet-balance {
+  font-size: 32px;
+  color: #e8e0ff;
+  text-shadow: 0 0 12px rgba(148, 100, 255, 0.4);
+  margin-bottom: 4px;
+  transition: transform 0.15s ease, text-shadow 0.15s ease;
+}
+
+.wallet-balance.flash {
+  transform: scale(1.08);
+  text-shadow: 0 0 20px rgba(100, 255, 150, 0.6);
+  color: #a0ffb0;
+}
+
+.wallet-address {
+  font-size: 12px;
+  color: rgba(148, 120, 200, 0.5);
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wallet-sponsors {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 100, 255, 0.15);
+  font-size: 13px;
+  color: rgba(200, 180, 255, 0.6);
+}
+
+.wallet-sponsor-count {
+  color: var(--crown-gold);
+  font-size: 15px;
+}
+
+/* ============= SPONSORS ON WALL ============= */
+#sponsor-wall {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sponsor-placard {
+  position: absolute;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  white-space: nowrap;
+}
+
+.sponsor-placard.visible {
+  opacity: 1;
+}
+
 /* ============= RESPONSIVE ============= */
 @media (max-width: 600px) {
   #lane { width: 340px; }
@@ -921,6 +1021,22 @@ body {
     </div>
     <div class="monitor-glow"></div>
     <div class="desk"></div>
+    <div id="sponsor-wall"></div>
+  </div>
+
+  <!-- Phantom Wallet -->
+  <div id="phantom-wallet" style="display:none;">
+    <div class="wallet-card">
+      <div class="wallet-header">
+        <span class="wallet-ghost">👻</span> PHANTOM WALLET
+      </div>
+      <div class="wallet-balance" id="wallet-balance">$0</div>
+      <div class="wallet-address">0xJACK...CL1P</div>
+      <div class="wallet-sponsors">
+        SPONSORS: <span class="wallet-sponsor-count" id="wallet-sponsor-count">0</span>
+        &nbsp; | &nbsp; RATE: <span class="wallet-sponsor-count" id="wallet-rate">x1</span>
+      </div>
+    </div>
   </div>
 
   <!-- Game lane -->
@@ -1178,14 +1294,79 @@ let longestStreak = 0;
 let totalClips = 0;
 let totalMisses = 0;
 let speedLevel = 1;
-let baseSpeed = 1.8; // pixels per frame
-let spawnInterval = 2200; // ms between spawns
+let baseSpeed = 3.0; // pixels per frame (faster start)
+let spawnInterval = 1800; // ms between spawns
 let lastSpawnTime = 0;
 let gameStartTime = 0;
 let lastSpeedIncreaseTime = 0;
 let cards = [];
 let cardIdCounter = 0;
 let animFrameId = null;
+
+// Sponsor system
+const SPONSORS = [
+  { name: 'RAID SHADOW', color: '#4caf50', bg: 'rgba(30,80,30,0.8)', border: '#4caf50' },
+  { name: 'NORD VPN', color: '#5ce0d8', bg: 'rgba(20,60,60,0.8)', border: '#5ce0d8' },
+  { name: 'HONEY', color: '#ff9800', bg: 'rgba(80,50,10,0.8)', border: '#ff9800' },
+  { name: 'SQUARESPACE', color: '#ffffff', bg: 'rgba(30,30,30,0.9)', border: '#666' },
+  { name: 'MANSCAPED', color: '#a0d468', bg: 'rgba(30,50,20,0.8)', border: '#a0d468' },
+  { name: 'RIDGE WALLET', color: '#d4a76a', bg: 'rgba(60,40,15,0.8)', border: '#d4a76a' },
+  { name: 'AUDIBLE', color: '#ff9900', bg: 'rgba(60,35,0,0.8)', border: '#ff9900' },
+  { name: 'SKILLSHARE', color: '#00c2ff', bg: 'rgba(0,40,60,0.8)', border: '#00c2ff' },
+  { name: 'BETTERHELP', color: '#44cc88', bg: 'rgba(15,50,30,0.8)', border: '#44cc88' },
+  { name: 'EXPRESSVPN', color: '#da3737', bg: 'rgba(60,15,15,0.8)', border: '#da3737' },
+];
+const SPONSOR_POSITIONS = [
+  { top: '6%', left: '3%', rot: -3 },
+  { top: '30%', right: '4%', rot: 2 },
+  { top: '55%', left: '5%', rot: -1 },
+  { top: '18%', left: '6%', rot: 4 },
+  { top: '70%', right: '3%', rot: -2 },
+  { top: '42%', left: '2%', rot: 1 },
+  { top: '85%', right: '5%', rot: -4 },
+  { top: '15%', right: '6%', rot: 3 },
+  { top: '60%', right: '6%', rot: -1 },
+  { top: '80%', left: '4%', rot: 2 },
+];
+let activeSponsorCount = 0;
+
+function getEarningsMultiplier() {
+  return 1 + activeSponsorCount * 0.25; // Each sponsor adds 25% more
+}
+
+function addSponsor() {
+  if (activeSponsorCount >= SPONSORS.length) return;
+  const sponsor = SPONSORS[activeSponsorCount];
+  const pos = SPONSOR_POSITIONS[activeSponsorCount];
+  const wall = document.getElementById('sponsor-wall');
+
+  const el = document.createElement('div');
+  el.className = 'sponsor-placard';
+  el.textContent = sponsor.name;
+  el.style.color = sponsor.color;
+  el.style.background = sponsor.bg;
+  el.style.borderColor = sponsor.border;
+  el.style.textShadow = `0 0 8px ${sponsor.color}40`;
+  el.style.boxShadow = `0 0 12px ${sponsor.border}30`;
+  if (pos.top) el.style.top = pos.top;
+  if (pos.left) el.style.left = pos.left;
+  if (pos.right) el.style.right = pos.right;
+  el.style.transform = `rotate(${pos.rot}deg)`;
+  wall.appendChild(el);
+
+  // Fade in
+  requestAnimationFrame(() => el.classList.add('visible'));
+
+  activeSponsorCount++;
+  updateWalletSponsors();
+}
+
+function updateWalletSponsors() {
+  const countEl = document.getElementById('wallet-sponsor-count');
+  const rateEl = document.getElementById('wallet-rate');
+  if (countEl) countEl.textContent = activeSponsorCount;
+  if (rateEl) rateEl.textContent = `x${getEarningsMultiplier().toFixed(2)}`;
+}
 
 // DOM elements
 const container = document.getElementById('game-container');
@@ -1223,8 +1404,8 @@ function createCard() {
   cardEl.className = 'footage-card';
   cardEl.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
 
-  // Card height for clip images — taller to show the screenshot
-  const cardHeight = 160 + Math.random() * 20;
+  // Card height uses 16:9 aspect ratio (440px wide -> 248px tall)
+  const cardHeight = 248;
   cardEl.style.height = cardHeight + 'px';
 
   // Vary clip window position across the card height for gameplay variety
@@ -1281,6 +1462,16 @@ function updateMoney() {
   moneyEl.classList.remove('tick');
   void moneyEl.offsetWidth; // force reflow
   moneyEl.classList.add('tick');
+
+  // Update phantom wallet
+  const walletBal = document.getElementById('wallet-balance');
+  if (walletBal) {
+    walletBal.textContent = `$${money.toLocaleString()}`;
+    walletBal.classList.remove('flash');
+    void walletBal.offsetWidth;
+    walletBal.classList.add('flash');
+    setTimeout(() => walletBal.classList.remove('flash'), 300);
+  }
 }
 
 function updateStreak() {
@@ -1292,13 +1483,13 @@ function updateSpeed() {
 }
 
 // ============= VISUAL EFFECTS =============
-function showRating(type, y) {
+function showRating(type, y, earned) {
   const popup = document.createElement('div');
   popup.className = 'rating-popup';
 
   if (type === 'perfect') {
     popup.classList.add('rating-perfect');
-    popup.textContent = '👑 PERFECT +$150';
+    popup.textContent = `👑 PERFECT +$${earned || 150}`;
     // Flash
     const flash = document.createElement('div');
     flash.className = 'perfect-flash';
@@ -1306,7 +1497,7 @@ function showRating(type, y) {
     setTimeout(() => flash.remove(), 400);
   } else if (type === 'good') {
     popup.classList.add('rating-good');
-    popup.textContent = '✅ GOOD +$75';
+    popup.textContent = `✅ GOOD +$${earned || 75}`;
   } else {
     popup.classList.add('rating-miss');
     popup.textContent = '❌ MISS';
@@ -1376,7 +1567,11 @@ function getCurrentSpeed() {
 }
 
 function getCurrentSpawnInterval() {
-  return Math.max(600, spawnInterval - (speedLevel - 1) * 180);
+  return Math.max(400, spawnInterval - (speedLevel - 1) * 200);
+}
+
+function getCurrentMinGap() {
+  return Math.max(8, 40 - (speedLevel - 1) * 5);
 }
 
 function handleClip() {
@@ -1416,14 +1611,17 @@ function handleClip() {
     bestCard.el.style.opacity = '0.3';
     bestCard.el.style.transition = 'opacity 0.3s';
 
+    const mult = getEarningsMultiplier();
     if (bestType === 'perfect') {
-      money += 150;
+      const earned = Math.round(150 * mult);
+      money += earned;
       audio.playPerfect();
-      showRating('perfect');
+      showRating('perfect', null, earned);
     } else {
-      money += 75;
+      const earned = Math.round(75 * mult);
+      money += earned;
       audio.playClip();
-      showRating('good');
+      showRating('good', null, earned);
     }
 
     streak++;
@@ -1432,7 +1630,8 @@ function handleClip() {
 
     // Streak bonus every 5
     if (streak > 0 && streak % 5 === 0) {
-      money += 200;
+      const bonus = Math.round(200 * mult);
+      money += bonus;
       showStreakBonus();
       audio.playStreak();
     }
@@ -1480,6 +1679,7 @@ function gameOver() {
 
   hud.style.display = 'none';
   jackSprite.style.display = 'none';
+  document.getElementById('phantom-wallet').style.display = 'none';
 
   // Random game over message
   const msg = GAME_OVER_MESSAGES[Math.floor(Math.random() * GAME_OVER_MESSAGES.length)];
@@ -1495,6 +1695,8 @@ function gameOver() {
     <div><span class="stat-label">LONGEST STREAK</span><span class="stat-value">🔥 ${longestStreak}</span></div>
     <hr class="stat-divider">
     <div><span class="stat-label">MAX SPEED</span><span class="stat-value">⚡ LVL ${speedLevel}</span></div>
+    <hr class="stat-divider">
+    <div><span class="stat-label">SPONSORS</span><span class="stat-value">💰 ${activeSponsorCount}</span></div>
   `;
 
   gameoverScreen.classList.add('active');
@@ -1522,15 +1724,21 @@ function startGame() {
   // Clear any leftover cards
   lane.querySelectorAll('.footage-card').forEach(el => el.remove());
 
+  // Reset sponsors
+  activeSponsorCount = 0;
+  document.getElementById('sponsor-wall').innerHTML = '';
+
   startScreen.style.display = 'none';
   gameoverScreen.classList.remove('active');
   hud.style.display = 'flex';
   jackSprite.style.display = 'block';
+  document.getElementById('phantom-wallet').style.display = 'block';
 
   updateLives();
   updateMoney();
   updateStreak();
   updateSpeed();
+  updateWalletSponsors();
 
   audio.init();
 
@@ -1549,12 +1757,13 @@ function gameLoop(timestamp) {
     lastSpeedIncreaseTime = now;
     updateSpeed();
     showSpeedWarning();
+    addSponsor(); // New sponsor each level
   }
 
   // Spawn cards - only if enough gap from the last card
   if (now - lastSpawnTime > getCurrentSpawnInterval()) {
     const lastCard = cards[cards.length - 1];
-    const minGap = 40; // minimum pixels between cards
+    const minGap = getCurrentMinGap();
     if (!lastCard || (lastCard.y > lastCard.height + minGap)) {
       createCard();
       lastSpawnTime = now;
