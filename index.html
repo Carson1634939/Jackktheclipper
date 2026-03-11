@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jack the Clipper</title>
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet"></noscript>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -118,9 +119,9 @@
 }
 
 body {
-  background: var(--dark-grey);
-  color: var(--dirty-white);
-  font-family: 'VT323', monospace;
+  background: #1a1a1e;
+  color: #d4cfc2;
+  font-family: 'VT323', 'Courier New', monospace;
   overflow: hidden;
   width: 100vw;
   height: 100vh;
@@ -255,7 +256,7 @@ body {
   position: absolute;
   top: 12%;
   left: 6%;
-  font-family: 'Special Elite', cursive;
+  font-family: 'Special Elite', 'Courier New', cursive;
   font-size: 18px;
   color: var(--neon-flicker);
   text-shadow: 0 0 10px var(--neon-flicker), 0 0 20px var(--neon-flicker), 0 0 40px var(--desert-red);
@@ -553,7 +554,7 @@ body {
   justify-content: space-between;
   padding: 0 20px;
   z-index: 50;
-  font-family: 'VT323', monospace;
+  font-family: 'VT323', 'Courier New', monospace;
   font-size: 22px;
 }
 
@@ -613,7 +614,7 @@ body {
 }
 
 .card-title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   font-size: 10px;
   line-height: 1.6;
   color: white;
@@ -668,7 +669,7 @@ body {
   position: absolute;
   left: 50%;
   z-index: 60;
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   font-size: 18px;
   text-align: center;
   pointer-events: none;
@@ -708,7 +709,7 @@ body {
   left: 50%;
   top: 40%;
   z-index: 65;
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   font-size: 16px;
   color: var(--crown-gold);
   text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,100,200,0.5);
@@ -724,7 +725,7 @@ body {
   left: 50%;
   top: 50%;
   z-index: 65;
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   font-size: 14px;
   color: var(--canyon-blue);
   text-shadow: 0 0 15px rgba(100,150,200,0.8);
@@ -748,7 +749,7 @@ body {
 }
 
 #start-screen .title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   font-size: 36px;
   color: var(--dirty-white);
   text-shadow: 0 0 20px rgba(196,101,42,0.5), 3px 3px 0 var(--desert-red);
@@ -765,7 +766,7 @@ body {
 }
 
 #start-screen .subtitle {
-  font-family: 'Special Elite', cursive;
+  font-family: 'Special Elite', 'Courier New', cursive;
   font-size: 28px;
   color: var(--desert-orange);
   text-transform: lowercase;
@@ -775,7 +776,7 @@ body {
 }
 
 #start-screen .stats-block {
-  font-family: 'VT323', monospace;
+  font-family: 'VT323', 'Courier New', monospace;
   font-size: 20px;
   color: var(--canyon-blue);
   margin-bottom: 40px;
@@ -785,7 +786,7 @@ body {
 }
 
 #start-screen .start-prompt {
-  font-family: 'VT323', monospace;
+  font-family: 'VT323', 'Courier New', monospace;
   font-size: 28px;
   color: var(--dirty-white);
   animation: pulse 1.5s ease-in-out infinite;
@@ -816,7 +817,7 @@ body {
 }
 
 #gameover-screen .go-title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
   font-size: 18px;
   color: var(--desert-red);
   text-shadow: 0 0 20px rgba(139,58,42,0.6);
@@ -826,7 +827,7 @@ body {
 }
 
 #gameover-screen .go-stats {
-  font-family: 'VT323', monospace;
+  font-family: 'VT323', 'Courier New', monospace;
   font-size: 22px;
   color: var(--dirty-white);
   background: rgba(0,0,0,0.5);
@@ -854,7 +855,7 @@ body {
 }
 
 #gameover-screen .restart-prompt {
-  font-family: 'VT323', monospace;
+  font-family: 'VT323', 'Courier New', monospace;
   font-size: 26px;
   color: var(--dirty-white);
   animation: pulse 1.5s ease-in-out infinite;
