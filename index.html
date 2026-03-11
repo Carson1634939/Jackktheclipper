@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack the Clipper</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --desert-orange: #c4652a;
+  --desert-red: #8b3a2a;
+  --canyon-blue: #6b8fa3;
+  --washed-blue: #8faab8;
+  --dirty-white: #d4cfc2;
+  --dark-grey: #1a1a1e;
+  --mid-grey: #2a2a30;
+  --cool-grey: #3a3a42;
+  --neon-flicker: #ff6b35;
+  --crown-gold: #ffd700;
+}
+
+@keyframes iridescent {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes iridescentBg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes neonFlicker {
+  0%, 100% { opacity: 0.9; }
+  5% { opacity: 0.1; }
+  6% { opacity: 0.9; }
+  50% { opacity: 0.8; }
+  51% { opacity: 0.2; }
+  52% { opacity: 0.9; }
+  80% { opacity: 0.7; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0,0); }
+  10% { transform: translate(-8px, 4px); }
+  20% { transform: translate(6px, -6px); }
+  30% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  50% { transform: translate(-2px, 4px); }
+  60% { transform: translate(2px, -1px); }
+  70% { transform: translate(-1px, 2px); }
+  80% { transform: translate(1px, -1px); }
+  90% { transform: translate(-1px, 1px); }
+}
+
+@keyframes crownGleam {
+  0% { filter: brightness(1) drop-shadow(0 0 2px gold); }
+  50% { filter: brightness(1.8) drop-shadow(0 0 12px gold); }
+  100% { filter: brightness(1) drop-shadow(0 0 2px gold); }
+}
+
+@keyframes slumpDown {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(8px); }
+}
+
+@keyframes bobUp {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes moneyTick {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.3); color: #4cff4c; }
+  100% { transform: scale(1); }
+}
+
+@keyframes ratingPop {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  20% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+  40% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -80%) scale(0.8); opacity: 0; }
+}
+
+@keyframes streakCelebration {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 1; }
+  30% { transform: translate(-50%, -50%) scale(1.5) rotate(5deg); opacity: 1; }
+  60% { transform: translate(-50%, -50%) scale(1.2) rotate(-3deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0; }
+}
+
+@keyframes speedFlash {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  20% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes scanline {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4px; }
+}
+
+@keyframes flashScreen {
+  0% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+@keyframes cardScroll {
+  from { transform: translateY(-100px); }
+}
+
+body {
+  background: var(--dark-grey);
+  color: var(--dirty-white);
+  font-family: 'VT323', monospace;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  user-select: none;
+}
+
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#game-container.shaking {
+  animation: shake 0.4s ease-out;
+}
+
+/* CRT Scanline overlay */
+#scanlines {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 1000;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  animation: scanline 0.3s linear infinite;
+}
+
+#scanlines::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.3) 100%);
+}
+
+/* ============= BACKGROUND SCENE ============= */
+#background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, var(--dark-grey) 0%, #1e1e24 100%);
+  z-index: 0;
+}
+
+/* Desert through window */
+.window-frame {
+  position: absolute;
+  top: 8%;
+  right: 8%;
+  width: 220px;
+  height: 160px;
+  border: 4px solid #4a4a50;
+  background: linear-gradient(180deg, #1a0a2e 0%, #4a1a0e 20%, #c4652a 50%, #d4874a 70%, #e8a86a 100%);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 15px rgba(196,101,42,0.2);
+  z-index: 1;
+}
+
+.window-frame::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  width: 3px; height: 100%;
+  background: #4a4a50;
+  transform: translateX(-50%);
+}
+
+.window-frame::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0;
+  width: 100%; height: 3px;
+  background: #4a4a50;
+  transform: translateY(-50%);
+}
+
+/* Window crack */
+.window-crack {
+  position: absolute;
+  top: 8%;
+  right: calc(8% + 30px);
+  width: 80px;
+  height: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.window-crack::before {
+  content: '';
+  position: absolute;
+  top: 20px; left: 10px;
+  width: 60px; height: 1px;
+  background: rgba(200,200,200,0.4);
+  transform: rotate(25deg);
+}
+
+.window-crack::after {
+  content: '';
+  position: absolute;
+  top: 30px; left: 30px;
+  width: 40px; height: 1px;
+  background: rgba(200,200,200,0.3);
+  transform: rotate(-15deg);
+}
+
+/* Mesas visible through window */
+.mesa {
+  position: absolute;
+  bottom: 30%;
+  z-index: 1;
+}
+
+.mesa-1 {
+  right: calc(8% + 20px);
+  width: 50px; height: 30px;
+  background: #6b2a1a;
+  clip-path: polygon(10% 100%, 0% 30%, 30% 0%, 70% 0%, 100% 30%, 90% 100%);
+}
+
+.mesa-2 {
+  right: calc(8% + 90px);
+  width: 70px; height: 40px;
+  background: #7b3a2a;
+  clip-path: polygon(5% 100%, 0% 40%, 25% 0%, 75% 0%, 100% 40%, 95% 100%);
+}
+
+/* Neon sign */
+.neon-sign {
+  position: absolute;
+  top: 12%;
+  left: 6%;
+  font-family: 'Special Elite', cursive;
+  font-size: 18px;
+  color: var(--neon-flicker);
+  text-shadow: 0 0 10px var(--neon-flicker), 0 0 20px var(--neon-flicker), 0 0 40px var(--desert-red);
+  animation: neonFlicker 3s infinite;
+  z-index: 2;
+  transform: rotate(-5deg);
+}
+
+/* Energy drink cans */
+.energy-cans {
+  position: absolute;
+  bottom: 20%;
+  left: 5%;
+  z-index: 2;
+}
+
+.can {
+  display: inline-block;
+  width: 14px;
+  height: 28px;
+  border-radius: 3px 3px 2px 2px;
+  margin: 0 2px;
+  position: relative;
+}
+
+.can-1 { background: linear-gradient(180deg, #2a6a2a, #1a4a1a); transform: rotate(-3deg); }
+.can-2 { background: linear-gradient(180deg, #1a1a6a, #0a0a4a); transform: rotate(5deg) translateY(-4px); }
+.can-3 { background: linear-gradient(180deg, #6a1a2a, #4a0a1a); transform: rotate(-8deg); }
+.can-4 { background: linear-gradient(180deg, #2a6a2a, #1a4a1a); transform: rotate(2deg) translateY(-8px); }
+.can-5 { background: linear-gradient(180deg, #6a4a1a, #4a2a0a); transform: rotate(-4deg) translateY(-2px); }
+
+/* Glowing monitor */
+.monitor-glow {
+  position: absolute;
+  bottom: 15%;
+  right: 25%;
+  width: 120px;
+  height: 80px;
+  background: rgba(60, 80, 120, 0.15);
+  border-radius: 4px;
+  box-shadow: 0 0 60px rgba(60, 100, 180, 0.15), 0 0 100px rgba(60, 100, 180, 0.08);
+  z-index: 1;
+}
+
+/* Desk */
+.desk {
+  position: absolute;
+  bottom: 12%;
+  left: 2%;
+  right: 60%;
+  height: 8px;
+  background: #3a2a1a;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+/* ============= GAME LANE ============= */
+#lane {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 100%;
+  background: rgba(20, 20, 26, 0.85);
+  border-left: 2px solid rgba(100, 100, 120, 0.3);
+  border-right: 2px solid rgba(100, 100, 120, 0.3);
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* Lane inner glow */
+#lane::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(100,60,180,0.03) 70%, rgba(150,80,220,0.08) 100%);
+  pointer-events: none;
+}
+
+/* ============= CUT LINE ============= */
+#cut-line {
+  position: absolute;
+  bottom: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;
+  height: 6px;
+  z-index: 20;
+  border-radius: 3px;
+  background: linear-gradient(90deg,
+    #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff00ff, #ff0000
+  );
+  background-size: 200% 100%;
+  animation: iridescentBg 2s linear infinite;
+  box-shadow:
+    0 0 15px rgba(255,100,200,0.6),
+    0 0 30px rgba(100,200,255,0.4),
+    0 0 60px rgba(200,100,255,0.3),
+    0 0 4px rgba(255,255,255,0.8);
+}
+
+#cut-line::before {
+  content: '✂';
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+  animation: iridescent 3s linear infinite;
+}
+
+#cut-line::after {
+  content: '✂';
+  position: absolute;
+  right: -25px;
+  top: 50%;
+  transform: translateY(-50%) scaleX(-1);
+  font-size: 22px;
+  animation: iridescent 3s linear infinite;
+}
+
+/* Secondary glow lines */
+.cut-line-glow {
+  position: absolute;
+  bottom: 128px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 370px;
+  height: 10px;
+  z-index: 19;
+  background: linear-gradient(90deg,
+    transparent, rgba(255,100,200,0.2), rgba(100,200,255,0.2), rgba(200,100,255,0.2), transparent
+  );
+  background-size: 200% 100%;
+  animation: iridescentBg 2s linear infinite;
+  filter: blur(4px);
+  border-radius: 5px;
+}
+
+/* ============= JACK SPRITE ============= */
+#jack-sprite {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  transition: transform 0.15s ease;
+}
+
+#jack-sprite.bob {
+  animation: bobUp 0.3s ease-out;
+}
+
+#jack-sprite.slump {
+  animation: slumpDown 0.3s ease-out forwards;
+}
+
+.jack-body {
+  position: relative;
+  width: 80px;
+  height: 90px;
+}
+
+/* Dark jacket / body */
+.jack-torso {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 50px;
+  background: #1a1a22;
+  border-radius: 8px 8px 4px 4px;
+  border: 1px solid #2a2a35;
+}
+
+/* Jacket collar */
+.jack-torso::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 8px;
+  background: #2a2a35;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Head */
+.jack-head {
+  position: absolute;
+  bottom: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 32px;
+  background: #d4a88c;
+  border-radius: 50% 50% 45% 45%;
+}
+
+/* Bowl cut hair */
+.jack-hair {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 24px;
+  background: #aaaaaa;
+  border-radius: 50% 50% 0 0;
+  z-index: 1;
+}
+
+/* Hair bangs */
+.jack-hair::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 2px;
+  right: 2px;
+  height: 10px;
+  background: #aaaaaa;
+  border-radius: 0 0 50% 50%;
+}
+
+/* Crown */
+.jack-crown {
+  position: absolute;
+  bottom: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 18px;
+  transition: filter 0.3s ease;
+}
+
+.jack-crown svg {
+  width: 100%;
+  height: 100%;
+}
+
+.jack-crown.gleam {
+  animation: crownGleam 0.5s ease;
+}
+
+/* Visor sunglasses */
+.jack-visor {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ff0044, #ff8800, #ffee00, #00ff88, #0088ff, #8800ff);
+  background-size: 300% 300%;
+  animation: iridescentBg 3s linear infinite;
+  box-shadow: 0 0 8px rgba(255,100,200,0.4), 0 0 15px rgba(100,200,255,0.3);
+  z-index: 2;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+}
+
+.jack-visor.dim {
+  opacity: 0.4;
+  box-shadow: none;
+  animation: none;
+  background: #444;
+}
+
+/* Arms */
+.jack-arm-left, .jack-arm-right {
+  position: absolute;
+  bottom: 8px;
+  width: 14px;
+  height: 35px;
+  background: #1a1a22;
+  border-radius: 6px;
+  border: 1px solid #2a2a35;
+}
+
+.jack-arm-left { left: 4px; transform: rotate(8deg); }
+.jack-arm-right { right: 4px; transform: rotate(-8deg); }
+
+/* ============= HUD ============= */
+#hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50px;
+  background: rgba(10,10,14,0.9);
+  border-bottom: 2px solid rgba(100,100,120,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 50;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+}
+
+#lives {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.life-crown {
+  font-size: 20px;
+  transition: opacity 0.3s ease;
+}
+
+.life-crown.lost {
+  opacity: 0.15;
+  filter: grayscale(1);
+}
+
+#money {
+  color: var(--crown-gold);
+  font-size: 26px;
+  transition: transform 0.1s, color 0.1s;
+  min-width: 140px;
+  text-align: center;
+}
+
+#money.tick {
+  animation: moneyTick 0.3s ease;
+}
+
+#speed-level {
+  color: var(--canyon-blue);
+  min-width: 100px;
+  text-align: center;
+}
+
+#streak {
+  color: var(--neon-flicker);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* ============= CARDS ============= */
+.footage-card {
+  position: absolute;
+  width: 300px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #1a1a2e, #2a1a1a);
+  border: 2px solid rgba(200, 100, 50, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 15;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  transition: none;
+}
+
+.card-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  padding: 6px 4px;
+}
+
+.card-title .highlight {
+  color: #ffcc00;
+  text-shadow: 0 0 8px rgba(255,200,0,0.5);
+}
+
+/* Clip window on card */
+.clip-window {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  height: 24px;
+  border: 2px solid;
+  border-image: linear-gradient(90deg, #ff0044, #ff8800, #00ff88, #0088ff, #8800ff) 1;
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 10px rgba(200,100,255,0.3), inset 0 0 10px rgba(200,100,255,0.1);
+  pointer-events: none;
+}
+
+.clip-bracket-left, .clip-bracket-right {
+  position: absolute;
+  top: -4px;
+  width: 8px;
+  height: calc(100% + 8px);
+  pointer-events: none;
+}
+
+.clip-bracket-left {
+  left: -2px;
+  border-left: 3px solid #ff44aa;
+  border-top: 3px solid #ff44aa;
+  border-bottom: 3px solid #ff44aa;
+}
+
+.clip-bracket-right {
+  right: -2px;
+  border-right: 3px solid #44aaff;
+  border-top: 3px solid #44aaff;
+  border-bottom: 3px solid #44aaff;
+}
+
+/* ============= RATING POPUP ============= */
+.rating-popup {
+  position: absolute;
+  left: 50%;
+  z-index: 60;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  text-align: center;
+  pointer-events: none;
+  animation: ratingPop 0.8s ease-out forwards;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  white-space: nowrap;
+}
+
+.rating-perfect {
+  color: #ff44ff;
+  background: linear-gradient(90deg, #ff0044, #ff8800, #ffff00, #00ff88, #0088ff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 100%;
+  animation: ratingPop 0.8s ease-out forwards, iridescentBg 0.5s linear infinite;
+  font-size: 22px;
+  filter: drop-shadow(0 0 10px rgba(255,100,255,0.8));
+}
+
+.rating-good { color: #44ff88; }
+.rating-miss { color: #ff4444; }
+
+/* Flash overlay for perfect */
+.perfect-flash {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,0,100,0.15), rgba(0,200,255,0.15), rgba(200,0,255,0.15));
+  z-index: 55;
+  pointer-events: none;
+  animation: flashScreen 0.4s ease-out forwards;
+}
+
+/* Streak celebration */
+.streak-popup {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  z-index: 65;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  color: var(--crown-gold);
+  text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,100,200,0.5);
+  pointer-events: none;
+  animation: streakCelebration 1.2s ease-out forwards;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Speed warning */
+.speed-popup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 65;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--canyon-blue);
+  text-shadow: 0 0 15px rgba(100,150,200,0.8);
+  pointer-events: none;
+  animation: speedFlash 1.5s ease-out forwards;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ============= START SCREEN ============= */
+#start-screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: radial-gradient(ellipse at 50% 60%, rgba(80,40,20,0.3), transparent 70%),
+              linear-gradient(180deg, #0e0e12 0%, #1a1218 40%, #1e1414 100%);
+}
+
+#start-screen .title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 36px;
+  color: var(--dirty-white);
+  text-shadow: 0 0 20px rgba(196,101,42,0.5), 3px 3px 0 var(--desert-red);
+  text-align: center;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+#start-screen .title .crown-icon {
+  display: block;
+  font-size: 42px;
+  margin-bottom: 8px;
+  animation: crownGleam 2s ease infinite;
+}
+
+#start-screen .subtitle {
+  font-family: 'Special Elite', cursive;
+  font-size: 28px;
+  color: var(--desert-orange);
+  text-transform: lowercase;
+  letter-spacing: 6px;
+  margin-bottom: 30px;
+  opacity: 0.8;
+}
+
+#start-screen .stats-block {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--canyon-blue);
+  margin-bottom: 40px;
+  text-align: center;
+  line-height: 1.8;
+  opacity: 0.7;
+}
+
+#start-screen .start-prompt {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: var(--dirty-white);
+  animation: pulse 1.5s ease-in-out infinite;
+  letter-spacing: 2px;
+}
+
+/* Start screen Jack */
+.start-jack {
+  margin: 20px 0;
+  position: relative;
+}
+
+/* ============= GAME OVER SCREEN ============= */
+#gameover-screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: radial-gradient(ellipse at 50% 60%, rgba(40,10,10,0.4), transparent 70%),
+              linear-gradient(180deg, #0e0e12 0%, #1a0e0e 100%);
+}
+
+#gameover-screen.active {
+  display: flex;
+}
+
+#gameover-screen .go-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  color: var(--desert-red);
+  text-shadow: 0 0 20px rgba(139,58,42,0.6);
+  text-align: center;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+#gameover-screen .go-stats {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: var(--dirty-white);
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(100,100,120,0.3);
+  padding: 20px 30px;
+  line-height: 2;
+  margin-bottom: 30px;
+  min-width: 320px;
+}
+
+#gameover-screen .go-stats .stat-label {
+  color: var(--canyon-blue);
+  opacity: 0.7;
+}
+
+#gameover-screen .go-stats .stat-value {
+  color: var(--crown-gold);
+  float: right;
+}
+
+.go-stats .stat-divider {
+  border: none;
+  border-top: 1px dashed rgba(100,100,120,0.3);
+  margin: 4px 0;
+}
+
+#gameover-screen .restart-prompt {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  color: var(--dirty-white);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Slumped Jack on game over */
+.gameover-jack {
+  margin: 15px 0;
+  position: relative;
+}
+
+.gameover-jack .jack-crown {
+  transform: translateX(-50%) rotate(15deg) !important;
+  left: calc(50% + 8px) !important;
+}
+
+.gameover-jack .jack-visor {
+  opacity: 0.3 !important;
+  box-shadow: none !important;
+  animation: none !important;
+  background: #444 !important;
+}
+
+.gameover-jack .jack-body {
+  transform: translateY(5px);
+}
+
+/* ============= RESPONSIVE ============= */
+@media (max-width: 600px) {
+  #lane { width: 280px; }
+  .footage-card { width: 250px; }
+  #cut-line { width: 300px; }
+  .cut-line-glow { width: 310px; }
+  #start-screen .title { font-size: 22px; }
+  #hud { font-size: 16px; padding: 0 10px; }
+  #hud #money { font-size: 20px; min-width: 100px; }
+}
+</style>
+</head>
+<body>
+<div id="game-container">
+  <!-- Background scene -->
+  <div id="background">
+    <div class="window-frame">
+      <div class="mesa mesa-1"></div>
+      <div class="mesa mesa-2"></div>
+    </div>
+    <div class="window-crack"></div>
+    <div class="neon-sign">CLIP IT</div>
+    <div class="energy-cans">
+      <div class="can can-1"></div>
+      <div class="can can-2"></div>
+      <div class="can can-3"></div>
+      <div class="can can-4"></div>
+      <div class="can can-5"></div>
+    </div>
+    <div class="monitor-glow"></div>
+    <div class="desk"></div>
+  </div>
+
+  <!-- Game lane -->
+  <div id="lane"></div>
+
+  <!-- Cut line -->
+  <div class="cut-line-glow"></div>
+  <div id="cut-line"></div>
+
+  <!-- Jack Sprite -->
+  <div id="jack-sprite">
+    <div class="jack-body">
+      <div class="jack-crown" id="jack-crown">
+        <svg viewBox="0 0 36 18">
+          <polygon points="2,18 6,4 12,12 18,0 24,12 30,4 34,18" fill="#ffd700" stroke="#daa520" stroke-width="1"/>
+          <circle cx="12" cy="14" r="2" fill="#ff4444"/>
+          <circle cx="18" cy="12" r="2" fill="#44ff44"/>
+          <circle cx="24" cy="14" r="2" fill="#4444ff"/>
+        </svg>
+      </div>
+      <div class="jack-hair"></div>
+      <div class="jack-head"></div>
+      <div class="jack-visor" id="jack-visor"></div>
+      <div class="jack-torso"></div>
+      <div class="jack-arm-left"></div>
+      <div class="jack-arm-right"></div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" style="display:none;">
+    <div id="lives"></div>
+    <div id="money">👑 $0</div>
+    <div id="speed-level">⚡ LVL 1</div>
+    <div id="streak">🔥 0</div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <div class="title">
+      <span class="crown-icon">👑</span>
+      JACK THE<br>CLIPPER
+    </div>
+    <div class="subtitle">clip or die</div>
+    <div class="start-jack">
+      <div class="jack-body" style="margin:0 auto;width:80px;height:90px;position:relative;">
+        <div class="jack-crown" style="position:absolute;bottom:76px;left:50%;transform:translateX(-50%);z-index:2;width:36px;height:18px;">
+          <svg viewBox="0 0 36 18"><polygon points="2,18 6,4 12,12 18,0 24,12 30,4 34,18" fill="#ffd700" stroke="#daa520" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="#ff4444"/><circle cx="18" cy="12" r="2" fill="#44ff44"/><circle cx="24" cy="14" r="2" fill="#4444ff"/></svg>
+        </div>
+        <div class="jack-hair" style="position:absolute;bottom:56px;left:50%;transform:translateX(-50%);width:44px;height:24px;background:#aaa;border-radius:50% 50% 0 0;z-index:1;"></div>
+        <div class="jack-head" style="position:absolute;bottom:42px;left:50%;transform:translateX(-50%);width:36px;height:32px;background:#d4a88c;border-radius:50% 50% 45% 45%;"></div>
+        <div class="jack-visor" style="position:absolute;bottom:52px;left:50%;transform:translateX(-50%);width:42px;height:14px;border-radius:20px;background:linear-gradient(135deg,#ff0044,#ff8800,#ffee00,#00ff88,#0088ff,#8800ff);background-size:300% 300%;animation:iridescentBg 3s linear infinite;box-shadow:0 0 8px rgba(255,100,200,0.4),0 0 15px rgba(100,200,255,0.3);z-index:2;"></div>
+        <div class="jack-torso" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60px;height:50px;background:#1a1a22;border-radius:8px 8px 4px 4px;border:1px solid #2a2a35;"></div>
+        <div class="jack-arm-left" style="position:absolute;bottom:8px;left:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(8deg);"></div>
+        <div class="jack-arm-right" style="position:absolute;bottom:8px;right:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(-8deg);"></div>
+      </div>
+    </div>
+    <div class="stats-block">
+      📍 Mom's Basement &nbsp;|&nbsp; 🕐 3:47 AM &nbsp;|&nbsp; ☕ Energy Drink #6
+    </div>
+    <div class="start-prompt">[ PRESS SPACEBAR TO START ]</div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameover-screen">
+    <div class="go-title" id="go-title"></div>
+    <div class="gameover-jack">
+      <div class="jack-body" style="margin:0 auto;width:80px;height:90px;position:relative;transform:translateY(5px);">
+        <div class="jack-crown" style="position:absolute;bottom:76px;left:calc(50% + 8px);transform:translateX(-50%) rotate(15deg);z-index:2;width:36px;height:18px;">
+          <svg viewBox="0 0 36 18"><polygon points="2,18 6,4 12,12 18,0 24,12 30,4 34,18" fill="#ffd700" stroke="#daa520" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="#ff4444"/><circle cx="18" cy="12" r="2" fill="#44ff44"/><circle cx="24" cy="14" r="2" fill="#4444ff"/></svg>
+        </div>
+        <div class="jack-hair" style="position:absolute;bottom:56px;left:50%;transform:translateX(-50%);width:44px;height:24px;background:#888;border-radius:50% 50% 0 0;z-index:1;"></div>
+        <div class="jack-head" style="position:absolute;bottom:42px;left:50%;transform:translateX(-50%);width:36px;height:32px;background:#c49880;border-radius:50% 50% 45% 45%;"></div>
+        <div class="jack-visor" style="position:absolute;bottom:52px;left:50%;transform:translateX(-50%);width:42px;height:14px;border-radius:20px;background:#444;opacity:0.3;z-index:2;"></div>
+        <div class="jack-torso" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60px;height:50px;background:#1a1a22;border-radius:8px 8px 4px 4px;border:1px solid #2a2a35;"></div>
+        <div class="jack-arm-left" style="position:absolute;bottom:8px;left:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(15deg);"></div>
+        <div class="jack-arm-right" style="position:absolute;bottom:8px;right:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(-15deg);"></div>
+      </div>
+    </div>
+    <div class="go-stats" id="go-stats"></div>
+    <div class="restart-prompt">[ PRESS SPACEBAR TO TRY AGAIN ]</div>
+  </div>
+
+  <!-- CRT Scanlines -->
+  <div id="scanlines"></div>
+</div>
+
+<script>
+// ============= AUDIO ENGINE =============
+class AudioEngine {
+  constructor() {
+    this.ctx = null;
+    this.initialized = false;
+  }
+
+  init() {
+    if (this.initialized) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.initialized = true;
+    this.startAmbient();
+  }
+
+  startAmbient() {
+    // Low hum drone
+    const osc1 = this.ctx.createOscillator();
+    const gain1 = this.ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.value = 55;
+    gain1.gain.value = 0.015;
+    osc1.connect(gain1);
+    gain1.connect(this.ctx.destination);
+    osc1.start();
+
+    // Subtle buzz
+    const osc2 = this.ctx.createOscillator();
+    const gain2 = this.ctx.createGain();
+    osc2.type = 'sawtooth';
+    osc2.frequency.value = 60;
+    gain2.gain.value = 0.005;
+    osc2.connect(gain2);
+    gain2.connect(this.ctx.destination);
+    osc2.start();
+
+    this.ambientOsc = [osc1, osc2];
+    this.ambientGain = [gain1, gain2];
+  }
+
+  playClip() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Snip/click sound
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1200, t);
+    osc.frequency.exponentialRampToValueAtTime(800, t + 0.05);
+    gain.gain.setValueAtTime(0.12, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.08);
+  }
+
+  playPerfect() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Bright chime
+    [880, 1320, 1760].forEach((freq, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, t + i * 0.04);
+      gain.gain.linearRampToValueAtTime(0.08, t + i * 0.04 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.04 + 0.2);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t + i * 0.04);
+      osc.stop(t + i * 0.04 + 0.2);
+    });
+  }
+
+  playMiss() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Dull thud
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(120, t);
+    osc.frequency.exponentialRampToValueAtTime(50, t + 0.15);
+    gain.gain.setValueAtTime(0.15, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.2);
+
+    // Buzz
+    const noise = this.ctx.createOscillator();
+    const ng = this.ctx.createGain();
+    noise.type = 'square';
+    noise.frequency.value = 80;
+    ng.gain.setValueAtTime(0.06, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    noise.connect(ng);
+    ng.connect(this.ctx.destination);
+    noise.start(t);
+    noise.stop(t + 0.12);
+  }
+
+  playStreak() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    // Short celebration jingle
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((freq, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, t + i * 0.08);
+      gain.gain.linearRampToValueAtTime(0.1, t + i * 0.08 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.2);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t + i * 0.08);
+      osc.stop(t + i * 0.08 + 0.25);
+    });
+  }
+}
+
+// ============= GAME STATE =============
+const TITLES = [
+  "I GAVE $1,000,000 TO A RANDOM STRANGER",
+  "LAST TO LEAVE THE DESERT WINS $500,000",
+  "SURVIVING 7 DAYS UNDERGROUND",
+  "I BOUGHT EVERY ITEM IN A STORE",
+  "WE BUILT A WORKING ROCKET",
+  "SPENDING 24 HRS IN THE WORLD'S LARGEST HOLE",
+  "I HIRED 100 PEOPLE TO DO ONE TASK",
+  "GIVING MY FRIEND $1M IF HE SURVIVES",
+  "WE FILLED A POOL WITH CASH",
+  "LAST TO LEAVE WINS MY HOUSE",
+  "I CHALLENGED THE WORLD'S STRONGEST MAN",
+  "EATING ONLY ONE FOOD FOR 30 DAYS",
+  "I GAVE AWAY MY PRIVATE JET",
+  "100 PLAYERS BUILD THE TALLEST TOWER",
+  "CAN 10,000 PEOPLE STOP A TRAIN",
+  "I SPENT $1M IN 24 HOURS",
+  "STRANDED ON AN ISLAND FOR A WEEK",
+  "WORLD'S LARGEST GAME OF TAG",
+  "BUYING EVERYTHING IN A VENDING MACHINE",
+  "I GAVE $10,000 TO RANDOM SUBSCRIBERS"
+];
+
+const GAME_OVER_MESSAGES = [
+  "MOM TURNED OFF\nTHE WIFI",
+  "JACK HAS BEEN\nEVICTED"
+];
+
+const HIGHLIGHT_COLORS = ['#ffcc00', '#ff8844', '#ffaa22'];
+
+const audio = new AudioEngine();
+
+let gameState = 'start'; // start, playing, gameover
+let lives = 3;
+let money = 0;
+let streak = 0;
+let longestStreak = 0;
+let totalClips = 0;
+let totalMisses = 0;
+let speedLevel = 1;
+let baseSpeed = 1.8; // pixels per frame
+let spawnInterval = 2200; // ms between spawns
+let lastSpawnTime = 0;
+let gameStartTime = 0;
+let lastSpeedIncreaseTime = 0;
+let cards = [];
+let cardIdCounter = 0;
+let animFrameId = null;
+
+// DOM elements
+const container = document.getElementById('game-container');
+const lane = document.getElementById('lane');
+const hud = document.getElementById('hud');
+const livesEl = document.getElementById('lives');
+const moneyEl = document.getElementById('money');
+const speedEl = document.getElementById('speed-level');
+const streakEl = document.getElementById('streak');
+const startScreen = document.getElementById('start-screen');
+const gameoverScreen = document.getElementById('gameover-screen');
+const jackSprite = document.getElementById('jack-sprite');
+const jackCrown = document.getElementById('jack-crown');
+const jackVisor = document.getElementById('jack-visor');
+
+// Cut line position (bottom of lane, in viewport coords)
+function getCutLineY() {
+  const cutLine = document.getElementById('cut-line');
+  const rect = cutLine.getBoundingClientRect();
+  return rect.top + rect.height / 2;
+}
+
+// ============= CARD MANAGEMENT =============
+function createCard() {
+  const id = cardIdCounter++;
+  const title = TITLES[Math.floor(Math.random() * TITLES.length)];
+
+  // Random card styling
+  const tintHue = Math.random() * 30 - 15; // slight hue shift
+  const rotation = (Math.random() - 0.5) * 2; // slight rotation
+
+  // Create title with random highlights
+  const words = title.split(' ');
+  const highlightCount = Math.floor(Math.random() * 3) + 1;
+  const highlightIndices = new Set();
+  while (highlightIndices.size < Math.min(highlightCount, words.length)) {
+    highlightIndices.add(Math.floor(Math.random() * words.length));
+  }
+
+  let titleHTML = words.map((word, i) => {
+    if (highlightIndices.has(i)) {
+      const color = HIGHLIGHT_COLORS[Math.floor(Math.random() * HIGHLIGHT_COLORS.length)];
+      return `<span class="highlight" style="color:${color}">${word}</span>`;
+    }
+    return word;
+  }).join(' ');
+
+  const cardEl = document.createElement('div');
+  cardEl.className = 'footage-card';
+  cardEl.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+  cardEl.style.filter = `hue-rotate(${tintHue}deg)`;
+
+  // Card height varies
+  const cardHeight = 80 + Math.random() * 30;
+  cardEl.style.height = cardHeight + 'px';
+
+  cardEl.innerHTML = `
+    <div class="card-title">${titleHTML}</div>
+    <div class="clip-window" style="bottom: ${8 + Math.random() * 15}px;">
+      <div class="clip-bracket-left"></div>
+      <div class="clip-bracket-right"></div>
+    </div>
+  `;
+
+  const startY = -cardHeight - 20;
+  cardEl.style.top = startY + 'px';
+  lane.appendChild(cardEl);
+
+  const card = {
+    id,
+    el: cardEl,
+    y: startY,
+    height: cardHeight,
+    clipWindowOffset: 8 + Math.random() * 15, // bottom offset of clip window
+    clipped: false,
+    missed: false
+  };
+
+  cards.push(card);
+  return card;
+}
+
+function removeCard(card) {
+  if (card.el && card.el.parentNode) {
+    card.el.parentNode.removeChild(card.el);
+  }
+  cards = cards.filter(c => c.id !== card.id);
+}
+
+// ============= UI UPDATES =============
+function updateLives() {
+  livesEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const crown = document.createElement('span');
+    crown.className = 'life-crown' + (i >= lives ? ' lost' : '');
+    crown.textContent = '👑';
+    livesEl.appendChild(crown);
+  }
+}
+
+function updateMoney() {
+  moneyEl.textContent = `👑 $${money.toLocaleString()}`;
+  moneyEl.classList.remove('tick');
+  void moneyEl.offsetWidth; // force reflow
+  moneyEl.classList.add('tick');
+}
+
+function updateStreak() {
+  streakEl.textContent = `🔥 ${streak}`;
+}
+
+function updateSpeed() {
+  speedEl.textContent = `⚡ LVL ${speedLevel}`;
+}
+
+// ============= VISUAL EFFECTS =============
+function showRating(type, y) {
+  const popup = document.createElement('div');
+  popup.className = 'rating-popup';
+
+  if (type === 'perfect') {
+    popup.classList.add('rating-perfect');
+    popup.textContent = '👑 PERFECT +$150';
+    // Flash
+    const flash = document.createElement('div');
+    flash.className = 'perfect-flash';
+    container.appendChild(flash);
+    setTimeout(() => flash.remove(), 400);
+  } else if (type === 'good') {
+    popup.classList.add('rating-good');
+    popup.textContent = '✅ GOOD +$75';
+  } else {
+    popup.classList.add('rating-miss');
+    popup.textContent = '❌ MISS';
+  }
+
+  popup.style.top = (y || getCutLineY()) + 'px';
+  container.appendChild(popup);
+  setTimeout(() => popup.remove(), 800);
+}
+
+function showStreakBonus() {
+  const popup = document.createElement('div');
+  popup.className = 'streak-popup';
+  popup.innerHTML = `👑 CLIP KING 👑<br>+$200 BONUS`;
+  container.appendChild(popup);
+  setTimeout(() => popup.remove(), 1200);
+
+  // Rainbow flash
+  const flash = document.createElement('div');
+  flash.className = 'perfect-flash';
+  flash.style.background = 'linear-gradient(135deg, rgba(255,0,100,0.2), rgba(0,200,255,0.2), rgba(200,0,255,0.2), rgba(255,200,0,0.2))';
+  container.appendChild(flash);
+  setTimeout(() => flash.remove(), 500);
+}
+
+function showSpeedWarning() {
+  const popup = document.createElement('div');
+  popup.className = 'speed-popup';
+  popup.textContent = `PICKING UP THE PACE 👑`;
+  container.appendChild(popup);
+  setTimeout(() => popup.remove(), 1500);
+}
+
+function shakeScreen() {
+  container.classList.remove('shaking');
+  void container.offsetWidth;
+  container.classList.add('shaking');
+  setTimeout(() => container.classList.remove('shaking'), 400);
+}
+
+function jackReact(type) {
+  jackSprite.classList.remove('bob', 'slump');
+  jackVisor.classList.remove('dim');
+  jackCrown.classList.remove('gleam');
+  void jackSprite.offsetWidth;
+
+  if (type === 'hit') {
+    jackSprite.classList.add('bob');
+    jackCrown.classList.add('gleam');
+    setTimeout(() => {
+      jackSprite.classList.remove('bob');
+      jackCrown.classList.remove('gleam');
+    }, 400);
+  } else {
+    jackSprite.classList.add('slump');
+    jackVisor.classList.add('dim');
+    setTimeout(() => {
+      jackSprite.classList.remove('slump');
+      jackVisor.classList.remove('dim');
+    }, 600);
+  }
+}
+
+// ============= GAME LOGIC =============
+function getCurrentSpeed() {
+  return baseSpeed + (speedLevel - 1) * 0.5;
+}
+
+function getCurrentSpawnInterval() {
+  return Math.max(600, spawnInterval - (speedLevel - 1) * 180);
+}
+
+function handleClip() {
+  if (gameState !== 'playing') return;
+
+  const cutLineY = getCutLineY();
+  let bestCard = null;
+  let bestDistance = Infinity;
+  let bestType = null;
+
+  for (const card of cards) {
+    if (card.clipped || card.missed) continue;
+
+    const cardRect = card.el.getBoundingClientRect();
+    const clipWindowEl = card.el.querySelector('.clip-window');
+    if (!clipWindowEl) continue;
+
+    const cwRect = clipWindowEl.getBoundingClientRect();
+    const cwCenter = cwRect.top + cwRect.height / 2;
+    const cwTop = cwRect.top;
+    const cwBottom = cwRect.bottom;
+
+    // Check if clip window overlaps cut line
+    if (cutLineY >= cwTop && cutLineY <= cwBottom) {
+      const dist = Math.abs(cutLineY - cwCenter);
+      if (dist < bestDistance) {
+        bestDistance = dist;
+        bestCard = card;
+        // Perfect if within center 40% of clip window
+        bestType = dist < cwRect.height * 0.2 ? 'perfect' : 'good';
+      }
+    }
+  }
+
+  if (bestCard) {
+    bestCard.clipped = true;
+    bestCard.el.style.opacity = '0.3';
+    bestCard.el.style.transition = 'opacity 0.3s';
+
+    if (bestType === 'perfect') {
+      money += 150;
+      audio.playPerfect();
+      showRating('perfect');
+    } else {
+      money += 75;
+      audio.playClip();
+      showRating('good');
+    }
+
+    streak++;
+    totalClips++;
+    if (streak > longestStreak) longestStreak = streak;
+
+    // Streak bonus every 5
+    if (streak > 0 && streak % 5 === 0) {
+      money += 200;
+      showStreakBonus();
+      audio.playStreak();
+    }
+
+    updateMoney();
+    updateStreak();
+    jackReact('hit');
+  } else {
+    // Miss - pressed at wrong time
+    handleMiss();
+  }
+}
+
+function handleMiss() {
+  lives--;
+  streak = 0;
+  totalMisses++;
+  updateLives();
+  updateStreak();
+  audio.playMiss();
+  showRating('miss');
+  shakeScreen();
+  jackReact('miss');
+
+  if (lives <= 0) {
+    gameOver();
+  }
+}
+
+function cardPassedWithoutClip(card) {
+  if (!card.clipped && !card.missed) {
+    card.missed = true;
+    handleMiss();
+  }
+}
+
+function gameOver() {
+  gameState = 'gameover';
+
+  // Clear cards
+  cards.forEach(c => {
+    if (c.el && c.el.parentNode) c.el.parentNode.removeChild(c.el);
+  });
+  cards = [];
+
+  hud.style.display = 'none';
+  jackSprite.style.display = 'none';
+
+  // Random game over message
+  const msg = GAME_OVER_MESSAGES[Math.floor(Math.random() * GAME_OVER_MESSAGES.length)];
+  document.getElementById('go-title').textContent = msg;
+
+  document.getElementById('go-stats').innerHTML = `
+    <div><span class="stat-label">TOTAL EARNED</span><span class="stat-value">$${money.toLocaleString()}</span></div>
+    <hr class="stat-divider">
+    <div><span class="stat-label">CLIPS COMPLETED</span><span class="stat-value">${totalClips}</span></div>
+    <hr class="stat-divider">
+    <div><span class="stat-label">MISSES</span><span class="stat-value">${totalMisses}</span></div>
+    <hr class="stat-divider">
+    <div><span class="stat-label">LONGEST STREAK</span><span class="stat-value">🔥 ${longestStreak}</span></div>
+    <hr class="stat-divider">
+    <div><span class="stat-label">MAX SPEED</span><span class="stat-value">⚡ LVL ${speedLevel}</span></div>
+  `;
+
+  gameoverScreen.classList.add('active');
+
+  if (animFrameId) {
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+  }
+}
+
+function startGame() {
+  gameState = 'playing';
+  lives = 3;
+  money = 0;
+  streak = 0;
+  longestStreak = 0;
+  totalClips = 0;
+  totalMisses = 0;
+  speedLevel = 1;
+  cards = [];
+  lastSpawnTime = 0;
+  gameStartTime = performance.now();
+  lastSpeedIncreaseTime = performance.now();
+
+  // Clear any leftover cards
+  lane.querySelectorAll('.footage-card').forEach(el => el.remove());
+
+  startScreen.style.display = 'none';
+  gameoverScreen.classList.remove('active');
+  hud.style.display = 'flex';
+  jackSprite.style.display = 'block';
+
+  updateLives();
+  updateMoney();
+  updateStreak();
+  updateSpeed();
+
+  audio.init();
+
+  gameLoop(performance.now());
+}
+
+// ============= GAME LOOP =============
+function gameLoop(timestamp) {
+  if (gameState !== 'playing') return;
+
+  const now = timestamp;
+
+  // Speed escalation every 15 seconds
+  if (now - lastSpeedIncreaseTime > 15000) {
+    speedLevel++;
+    lastSpeedIncreaseTime = now;
+    updateSpeed();
+    showSpeedWarning();
+  }
+
+  // Spawn cards
+  if (now - lastSpawnTime > getCurrentSpawnInterval()) {
+    createCard();
+    lastSpawnTime = now;
+  }
+
+  const speed = getCurrentSpeed();
+
+  // Update card positions
+  for (let i = cards.length - 1; i >= 0; i--) {
+    const card = cards[i];
+    card.y += speed;
+    card.el.style.top = card.y + 'px';
+
+    // Check if card's clip window has passed below the cut line
+    const cardRect = card.el.getBoundingClientRect();
+    const clipWindowEl = card.el.querySelector('.clip-window');
+
+    if (clipWindowEl) {
+      const cwRect = clipWindowEl.getBoundingClientRect();
+      const cutLineY = getCutLineY();
+
+      // If the entire clip window is below the cut line by a margin
+      if (cwRect.top > cutLineY + 30 && !card.clipped && !card.missed) {
+        cardPassedWithoutClip(card);
+      }
+    }
+
+    // Remove cards that have gone off screen
+    if (card.y > window.innerHeight + 50) {
+      removeCard(card);
+    }
+  }
+
+  animFrameId = requestAnimationFrame(gameLoop);
+}
+
+// ============= INPUT =============
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+
+    if (gameState === 'start') {
+      startGame();
+    } else if (gameState === 'playing') {
+      handleClip();
+    } else if (gameState === 'gameover') {
+      startGame();
+    }
+  }
+});
+
+// Touch support
+document.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  if (gameState === 'start') {
+    startGame();
+  } else if (gameState === 'playing') {
+    handleClip();
+  } else if (gameState === 'gameover') {
+    startGame();
+  }
+});
+
+// Prevent spacebar scroll
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') e.preventDefault();
+});
+</script>
+</body>
+</html>
