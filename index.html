@@ -1079,38 +1079,125 @@ class AudioEngine {
   constructor() {
     this.ctx = null;
     this.initialized = false;
+    this.musicInterval = null;
+    this.musicBPM = 140;
+    this.musicStep = 0;
   }
 
   init() {
     if (this.initialized) return;
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     this.initialized = true;
-    this.startAmbient();
   }
 
-  startAmbient() {
-    // Low hum drone
-    const osc1 = this.ctx.createOscillator();
-    const gain1 = this.ctx.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.value = 55;
-    gain1.gain.value = 0.015;
-    osc1.connect(gain1);
-    gain1.connect(this.ctx.destination);
-    osc1.start();
+  startMusic() {
+    if (this.musicInterval) return;
+    this.musicStep = 0;
+    this.musicBPM = 140;
+    this._scheduleMusic();
+  }
 
-    // Subtle buzz
-    const osc2 = this.ctx.createOscillator();
-    const gain2 = this.ctx.createGain();
-    osc2.type = 'sawtooth';
-    osc2.frequency.value = 60;
-    gain2.gain.value = 0.005;
-    osc2.connect(gain2);
-    gain2.connect(this.ctx.destination);
-    osc2.start();
+  _scheduleMusic() {
+    const msPerBeat = 60000 / this.musicBPM / 2; // 8th notes
 
-    this.ambientOsc = [osc1, osc2];
-    this.ambientGain = [gain1, gain2];
+    // Catchy chiptune melody pattern (pentatonic + octave jumps)
+    const melody = [
+      523, 587, 659, 784, 880, 784, 659, 587,  // C5 D5 E5 G5 A5 G5 E5 D5
+      523, 659, 784, 1047, 880, 784, 659, 523,  // C5 E5 G5 C6 A5 G5 E5 C5
+      392, 440, 523, 659, 784, 659, 523, 440,   // G4 A4 C5 E5 G5 E5 C5 A4
+      523, 784, 880, 1047, 880, 784, 659, 784,  // C5 G5 A5 C6 A5 G5 E5 G5
+    ];
+
+    // Bass line (root notes, lower octave)
+    const bass = [
+      131, 131, 131, 131, 175, 175, 175, 175,  // C3 C3 C3 C3 F3 F3 F3 F3
+      196, 196, 196, 196, 165, 165, 165, 165,  // G3 G3 G3 G3 E3 E3 E3 E3
+      131, 131, 131, 131, 175, 175, 175, 175,
+      196, 196, 196, 196, 131, 131, 131, 131,
+    ];
+
+    // Rhythm accent pattern (kick on 1,3; snare on 2,4)
+    const kick =  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
+    const snare = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
+
+    this.musicInterval = setInterval(() => {
+      if (!this.ctx || this.ctx.state === 'closed') { this.stopMusic(); return; }
+      const t = this.ctx.currentTime;
+      const i = this.musicStep % melody.length;
+      const beatDur = 60 / this.musicBPM / 2;
+
+      // Melody - square wave chiptune
+      const mOsc = this.ctx.createOscillator();
+      const mGain = this.ctx.createGain();
+      mOsc.type = 'square';
+      mOsc.frequency.value = melody[i];
+      mGain.gain.setValueAtTime(0.06, t);
+      mGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
+      mOsc.connect(mGain);
+      mGain.connect(this.ctx.destination);
+      mOsc.start(t);
+      mOsc.stop(t + beatDur);
+
+      // Bass - triangle wave
+      const bOsc = this.ctx.createOscillator();
+      const bGain = this.ctx.createGain();
+      bOsc.type = 'triangle';
+      bOsc.frequency.value = bass[i];
+      bGain.gain.setValueAtTime(0.07, t);
+      bGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
+      bOsc.connect(bGain);
+      bGain.connect(this.ctx.destination);
+      bOsc.start(t);
+      bOsc.stop(t + beatDur);
+
+      // Kick drum
+      if (kick[i]) {
+        const kOsc = this.ctx.createOscillator();
+        const kGain = this.ctx.createGain();
+        kOsc.type = 'sine';
+        kOsc.frequency.setValueAtTime(150, t);
+        kOsc.frequency.exponentialRampToValueAtTime(40, t + 0.08);
+        kGain.gain.setValueAtTime(0.15, t);
+        kGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+        kOsc.connect(kGain);
+        kGain.connect(this.ctx.destination);
+        kOsc.start(t);
+        kOsc.stop(t + 0.1);
+      }
+
+      // Snare (noise-like)
+      if (snare[i]) {
+        const sOsc = this.ctx.createOscillator();
+        const sGain = this.ctx.createGain();
+        sOsc.type = 'sawtooth';
+        sOsc.frequency.value = 200 + Math.random() * 400;
+        sGain.gain.setValueAtTime(0.06, t);
+        sGain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+        sOsc.connect(sGain);
+        sGain.connect(this.ctx.destination);
+        sOsc.start(t);
+        sOsc.stop(t + 0.06);
+      }
+
+      this.musicStep++;
+    }, msPerBeat);
+  }
+
+  setMusicSpeed(sponsorCount) {
+    // Speed up BPM with each sponsor: 140 -> 160 -> 180 -> 200 -> 220 -> 240
+    this.musicBPM = 140 + sponsorCount * 20;
+    if (this.musicInterval) {
+      clearInterval(this.musicInterval);
+      this.musicInterval = null;
+      this._scheduleMusic();
+    }
+  }
+
+  stopMusic() {
+    if (this.musicInterval) {
+      clearInterval(this.musicInterval);
+      this.musicInterval = null;
+    }
   }
 
   playClip() {
@@ -1267,6 +1354,7 @@ function addSponsor() {
   // Update sponsor board image
   const board = document.getElementById('sponsor-board');
   if (board) board.src = `./Sponsor${activeSponsorCount}.jpg`;
+  audio.setMusicSpeed(activeSponsorCount);
   updateWalletSponsors();
 }
 
@@ -1584,6 +1672,7 @@ function cardPassedWithoutClip(card) {
 
 function gameOver() {
   gameState = 'gameover';
+  audio.stopMusic();
 
   // Clear cards
   cards.forEach(c => {
@@ -1652,6 +1741,7 @@ function startGame() {
   updateWalletSponsors();
 
   audio.init();
+  audio.startMusic();
 
   gameLoop(performance.now());
 }
