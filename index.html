@@ -501,8 +501,8 @@ body {
 }
 
 .scene-jack-mom {
-  right: 15%;
-  top: 2%;
+  right: 20%;
+  top: 8%;
   width: 300px;
   height: auto;
   transform: rotate(3deg);
@@ -819,33 +819,35 @@ body {
 }
 
 .wallet-card {
-  background: linear-gradient(145deg, #1a1028, #0e0a18 40%, #1a0e28);
-  border: 1px solid rgba(148, 100, 255, 0.3);
-  border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 4px 24px rgba(100, 50, 200, 0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.wallet-header {
+.wallet-bg-img {
+  width: 100%;
+  display: block;
+  border-radius: 20px;
+}
+
+.wallet-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-size: 18px;
-  color: rgba(200, 180, 255, 0.7);
-  letter-spacing: 1px;
-}
-
-.wallet-ghost {
-  font-size: 24px;
-  filter: drop-shadow(0 0 6px rgba(148, 100, 255, 0.6));
+  justify-content: center;
+  padding: 20px;
 }
 
 .wallet-balance {
-  font-size: 48px;
-  color: #e8e0ff;
-  text-shadow: 0 0 12px rgba(148, 100, 255, 0.4);
-  margin-bottom: 4px;
+  font-size: 56px;
+  color: #ffffff;
+  text-shadow: 0 0 16px rgba(148, 100, 255, 0.6), 0 2px 4px rgba(0,0,0,0.8);
+  margin-top: -10px;
   transition: transform 0.15s ease, text-shadow 0.15s ease;
 }
 
@@ -855,25 +857,16 @@ body {
   color: #a0ffb0;
 }
 
-.wallet-address {
-  font-size: 12px;
-  color: rgba(148, 120, 200, 0.5);
-  letter-spacing: 0.5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .wallet-sponsors {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(148, 100, 255, 0.15);
-  font-size: 13px;
-  color: rgba(200, 180, 255, 0.6);
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  margin-top: 4px;
 }
 
 .wallet-sponsor-count {
   color: var(--crown-gold);
-  font-size: 15px;
+  font-size: 18px;
 }
 
 /* ============= SPONSORS ON WALL ============= */
@@ -907,14 +900,13 @@ body {
   <!-- Phantom Wallet -->
   <div id="phantom-wallet" style="display:none;">
     <div class="wallet-card">
-      <div class="wallet-header">
-        <span class="wallet-ghost">👻</span> PHANTOM WALLET
-      </div>
-      <div class="wallet-balance" id="wallet-balance">$0</div>
-      <div class="wallet-address">0xJACK...CL1P</div>
-      <div class="wallet-sponsors">
-        SPONSORS: <span class="wallet-sponsor-count" id="wallet-sponsor-count">0</span>
-        &nbsp; | &nbsp; RATE: <span class="wallet-sponsor-count" id="wallet-rate">x1</span>
+      <img src="./Phantomwallet.jpg" class="wallet-bg-img" alt="Phantom Wallet" draggable="false">
+      <div class="wallet-overlay">
+        <div class="wallet-balance" id="wallet-balance">$0</div>
+        <div class="wallet-sponsors">
+          SPONSORS: <span class="wallet-sponsor-count" id="wallet-sponsor-count">0</span>
+          &nbsp; | &nbsp; RATE: <span class="wallet-sponsor-count" id="wallet-rate">x1</span>
+        </div>
       </div>
     </div>
   </div>
