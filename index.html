@@ -501,11 +501,18 @@ body {
 }
 
 .scene-jack-mom {
-  left: 8%;
+  right: 8%;
   top: 12%;
   width: 360px;
   height: auto;
-  transform: rotate(-3deg);
+  transform: rotate(3deg);
+}
+
+.scene-sponsor-board {
+  left: 5%;
+  top: 8%;
+  width: 380px;
+  height: auto;
 }
 
 .card-title {
@@ -870,34 +877,6 @@ body {
 }
 
 /* ============= SPONSORS ON WALL ============= */
-#sponsor-wall {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.sponsor-placard {
-  position: absolute;
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-family: 'Press Start 2P', 'Courier New', monospace;
-  font-size: 8px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border: 1px solid;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-  white-space: nowrap;
-}
-
-.sponsor-placard.visible {
-  opacity: 1;
-}
 
 /* ============= RESPONSIVE ============= */
 @media (max-width: 600px) {
@@ -918,11 +897,11 @@ body {
 <div id="game-container">
   <!-- Background scene -->
   <div id="background">
-    <div id="sponsor-wall"></div>
     <!-- Scene decorations -->
     <img src="./JackClipIt.jpg" class="scene-decor scene-jack-clipit" alt="Jack Clip It" draggable="false">
     <img src="./PlantAndBeer.jpg" class="scene-decor scene-plant-beer" alt="Plant and Beer" draggable="false">
     <img src="./JackandMom.jpg" class="scene-decor scene-jack-mom" alt="Jack and Mom" draggable="false">
+    <img id="sponsor-board" src="./Sponsor0.jpg" class="scene-decor scene-sponsor-board" alt="Sponsor Board" draggable="false">
   </div>
 
   <!-- Phantom Wallet -->
@@ -1193,30 +1172,7 @@ let cardIdCounter = 0;
 let animFrameId = null;
 
 // Sponsor system
-const SPONSORS = [
-  { name: 'RAID SHADOW', color: '#4caf50', bg: 'rgba(30,80,30,0.8)', border: '#4caf50' },
-  { name: 'NORD VPN', color: '#5ce0d8', bg: 'rgba(20,60,60,0.8)', border: '#5ce0d8' },
-  { name: 'HONEY', color: '#ff9800', bg: 'rgba(80,50,10,0.8)', border: '#ff9800' },
-  { name: 'SQUARESPACE', color: '#ffffff', bg: 'rgba(30,30,30,0.9)', border: '#666' },
-  { name: 'MANSCAPED', color: '#a0d468', bg: 'rgba(30,50,20,0.8)', border: '#a0d468' },
-  { name: 'RIDGE WALLET', color: '#d4a76a', bg: 'rgba(60,40,15,0.8)', border: '#d4a76a' },
-  { name: 'AUDIBLE', color: '#ff9900', bg: 'rgba(60,35,0,0.8)', border: '#ff9900' },
-  { name: 'SKILLSHARE', color: '#00c2ff', bg: 'rgba(0,40,60,0.8)', border: '#00c2ff' },
-  { name: 'BETTERHELP', color: '#44cc88', bg: 'rgba(15,50,30,0.8)', border: '#44cc88' },
-  { name: 'EXPRESSVPN', color: '#da3737', bg: 'rgba(60,15,15,0.8)', border: '#da3737' },
-];
-const SPONSOR_POSITIONS = [
-  { top: '6%', left: '3%', rot: -3 },
-  { top: '30%', right: '4%', rot: 2 },
-  { top: '55%', left: '5%', rot: -1 },
-  { top: '18%', left: '6%', rot: 4 },
-  { top: '70%', right: '3%', rot: -2 },
-  { top: '42%', left: '2%', rot: 1 },
-  { top: '85%', right: '5%', rot: -4 },
-  { top: '15%', right: '6%', rot: 3 },
-  { top: '60%', right: '6%', rot: -1 },
-  { top: '80%', left: '4%', rot: 2 },
-];
+const MAX_SPONSORS = 5;
 let activeSponsorCount = 0;
 
 function getEarningsMultiplier() {
@@ -1224,29 +1180,11 @@ function getEarningsMultiplier() {
 }
 
 function addSponsor() {
-  if (activeSponsorCount >= SPONSORS.length) return;
-  const sponsor = SPONSORS[activeSponsorCount];
-  const pos = SPONSOR_POSITIONS[activeSponsorCount];
-  const wall = document.getElementById('sponsor-wall');
-
-  const el = document.createElement('div');
-  el.className = 'sponsor-placard';
-  el.textContent = sponsor.name;
-  el.style.color = sponsor.color;
-  el.style.background = sponsor.bg;
-  el.style.borderColor = sponsor.border;
-  el.style.textShadow = `0 0 8px ${sponsor.color}40`;
-  el.style.boxShadow = `0 0 12px ${sponsor.border}30`;
-  if (pos.top) el.style.top = pos.top;
-  if (pos.left) el.style.left = pos.left;
-  if (pos.right) el.style.right = pos.right;
-  el.style.transform = `rotate(${pos.rot}deg)`;
-  wall.appendChild(el);
-
-  // Fade in
-  requestAnimationFrame(() => el.classList.add('visible'));
-
+  if (activeSponsorCount >= MAX_SPONSORS) return;
   activeSponsorCount++;
+  // Update sponsor board image
+  const board = document.getElementById('sponsor-board');
+  if (board) board.src = `./Sponsor${activeSponsorCount}.jpg`;
   updateWalletSponsors();
 }
 
@@ -1612,7 +1550,8 @@ function startGame() {
 
   // Reset sponsors
   activeSponsorCount = 0;
-  document.getElementById('sponsor-wall').innerHTML = '';
+  const board = document.getElementById('sponsor-board');
+  if (board) board.src = './Sponsor0.jpg';
 
   startScreen.style.display = 'none';
   gameoverScreen.classList.remove('active');
