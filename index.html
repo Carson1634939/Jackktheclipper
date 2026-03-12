@@ -1529,8 +1529,9 @@ function handleClip() {
     updateStreak();
     jackReact('hit');
   } else {
-    // Miss - pressed at wrong time
-    handleMiss();
+    // Pressed at wrong time - no life penalty, just ignore
+    audio.playMiss();
+    showRating('miss');
   }
 }
 
