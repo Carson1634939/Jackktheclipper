@@ -166,151 +166,8 @@ body {
 #background {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, var(--dark-grey) 0%, #1e1e24 100%);
+  background: #2a2a30;
   z-index: 0;
-}
-
-/* Desert through window */
-.window-frame {
-  position: absolute;
-  top: 8%;
-  right: 8%;
-  width: 220px;
-  height: 160px;
-  border: 4px solid #4a4a50;
-  background: linear-gradient(180deg, #1a0a2e 0%, #4a1a0e 20%, #c4652a 50%, #d4874a 70%, #e8a86a 100%);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 15px rgba(196,101,42,0.2);
-  z-index: 1;
-}
-
-.window-frame::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 50%;
-  width: 3px; height: 100%;
-  background: #4a4a50;
-  transform: translateX(-50%);
-}
-
-.window-frame::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 0;
-  width: 100%; height: 3px;
-  background: #4a4a50;
-  transform: translateY(-50%);
-}
-
-/* Window crack */
-.window-crack {
-  position: absolute;
-  top: 8%;
-  right: calc(8% + 30px);
-  width: 80px;
-  height: 80px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.window-crack::before {
-  content: '';
-  position: absolute;
-  top: 20px; left: 10px;
-  width: 60px; height: 1px;
-  background: rgba(200,200,200,0.4);
-  transform: rotate(25deg);
-}
-
-.window-crack::after {
-  content: '';
-  position: absolute;
-  top: 30px; left: 30px;
-  width: 40px; height: 1px;
-  background: rgba(200,200,200,0.3);
-  transform: rotate(-15deg);
-}
-
-/* Mesas visible through window */
-.mesa {
-  position: absolute;
-  bottom: 30%;
-  z-index: 1;
-}
-
-.mesa-1 {
-  right: calc(8% + 20px);
-  width: 50px; height: 30px;
-  background: #6b2a1a;
-  clip-path: polygon(10% 100%, 0% 30%, 30% 0%, 70% 0%, 100% 30%, 90% 100%);
-}
-
-.mesa-2 {
-  right: calc(8% + 90px);
-  width: 70px; height: 40px;
-  background: #7b3a2a;
-  clip-path: polygon(5% 100%, 0% 40%, 25% 0%, 75% 0%, 100% 40%, 95% 100%);
-}
-
-/* Neon sign */
-.neon-sign {
-  position: absolute;
-  top: 12%;
-  left: 6%;
-  font-family: 'Special Elite', 'Courier New', cursive;
-  font-size: 18px;
-  color: var(--neon-flicker);
-  text-shadow: 0 0 10px var(--neon-flicker), 0 0 20px var(--neon-flicker), 0 0 40px var(--desert-red);
-  animation: neonFlicker 3s infinite;
-  z-index: 2;
-  transform: rotate(-5deg);
-}
-
-/* Energy drink cans */
-.energy-cans {
-  position: absolute;
-  bottom: 20%;
-  left: 5%;
-  z-index: 2;
-}
-
-.can {
-  display: inline-block;
-  width: 14px;
-  height: 28px;
-  border-radius: 3px 3px 2px 2px;
-  margin: 0 2px;
-  position: relative;
-}
-
-.can-1 { background: linear-gradient(180deg, #2a6a2a, #1a4a1a); transform: rotate(-3deg); }
-.can-2 { background: linear-gradient(180deg, #1a1a6a, #0a0a4a); transform: rotate(5deg) translateY(-4px); }
-.can-3 { background: linear-gradient(180deg, #6a1a2a, #4a0a1a); transform: rotate(-8deg); }
-.can-4 { background: linear-gradient(180deg, #2a6a2a, #1a4a1a); transform: rotate(2deg) translateY(-8px); }
-.can-5 { background: linear-gradient(180deg, #6a4a1a, #4a2a0a); transform: rotate(-4deg) translateY(-2px); }
-
-/* Glowing monitor */
-.monitor-glow {
-  position: absolute;
-  bottom: 15%;
-  right: 25%;
-  width: 120px;
-  height: 80px;
-  background: rgba(60, 80, 120, 0.15);
-  border-radius: 4px;
-  box-shadow: 0 0 60px rgba(60, 100, 180, 0.15), 0 0 100px rgba(60, 100, 180, 0.08);
-  z-index: 1;
-}
-
-/* Desk */
-.desk {
-  position: absolute;
-  bottom: 12%;
-  left: 2%;
-  right: 60%;
-  height: 8px;
-  background: #3a2a1a;
-  border-radius: 2px;
-  z-index: 1;
 }
 
 /* ============= GAME LANE ============= */
@@ -632,21 +489,21 @@ body {
 .scene-jack-clipit {
   right: 0%;
   bottom: 0%;
-  width: 300px;
+  width: 500px;
   height: auto;
 }
 
 .scene-plant-beer {
   left: 0%;
   bottom: 0%;
-  width: 250px;
+  width: 420px;
   height: auto;
 }
 
 .scene-jack-mom {
   left: 8%;
-  top: 18%;
-  width: 220px;
+  top: 12%;
+  width: 360px;
   height: auto;
   transform: rotate(-3deg);
 }
@@ -1061,21 +918,6 @@ body {
 <div id="game-container">
   <!-- Background scene -->
   <div id="background">
-    <div class="window-frame">
-      <div class="mesa mesa-1"></div>
-      <div class="mesa mesa-2"></div>
-    </div>
-    <div class="window-crack"></div>
-    <div class="neon-sign">CLIP IT</div>
-    <div class="energy-cans">
-      <div class="can can-1"></div>
-      <div class="can can-2"></div>
-      <div class="can can-3"></div>
-      <div class="can can-4"></div>
-      <div class="can can-5"></div>
-    </div>
-    <div class="monitor-glow"></div>
-    <div class="desk"></div>
     <div id="sponsor-wall"></div>
     <!-- Scene decorations -->
     <img src="./JackClipIt.jpg" class="scene-decor scene-jack-clipit" alt="Jack Clip It" draggable="false">
