@@ -1323,9 +1323,10 @@ let streak = 0;
 let longestStreak = 0;
 let totalClips = 0;
 let totalMisses = 0;
-let baseSpeed = 3.0; // pixels per frame (faster start)
+let baseSpeed = 3.0; // pixels per 16.67ms frame (faster start)
 let spawnInterval = 1800; // ms between spawns
 let lastSpawnTime = 0;
+let lastFrameTime = 0;
 let gameStartTime = 0;
 let lastSpeedIncreaseTime = 0;
 let cards = [];
@@ -1711,6 +1712,7 @@ function startGame() {
   totalMisses = 0;
   cards = [];
   lastSpawnTime = 0;
+  lastFrameTime = 0;
   gameStartTime = performance.now();
   lastSpeedIncreaseTime = performance.now();
 
@@ -1766,10 +1768,15 @@ function gameLoop(timestamp) {
 
   const speed = getCurrentSpeed();
 
+  // Delta-time: normalize movement so frame drops don't slow the game
+  const dt = lastFrameTime ? (now - lastFrameTime) / 16.667 : 1; // 1 = normal 60fps frame
+  const cappedDt = Math.min(dt, 3); // cap to prevent huge jumps after tab switch
+  lastFrameTime = now;
+
   // Update card positions
   for (let i = cards.length - 1; i >= 0; i--) {
     const card = cards[i];
-    card.y += speed;
+    card.y += speed * cappedDt;
     card.el.style.top = card.y + 'px';
 
     // Check if card's clip window has passed below the cut line
