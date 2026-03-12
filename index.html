@@ -1390,15 +1390,15 @@ function jackReact(type) {
 
 // ============= GAME LOGIC =============
 function getCurrentSpeed() {
-  return baseSpeed + activeSponsorCount * 0.5;
+  return baseSpeed + activeSponsorCount * 1.0;
 }
 
 function getCurrentSpawnInterval() {
-  return Math.max(400, spawnInterval - activeSponsorCount * 200);
+  return Math.max(300, spawnInterval - activeSponsorCount * 300);
 }
 
 function getCurrentMinGap() {
-  return Math.max(8, 40 - activeSponsorCount * 5);
+  return Math.max(4, 40 - activeSponsorCount * 8);
 }
 
 function handleClip() {
