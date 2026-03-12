@@ -943,10 +943,10 @@ body {
   #gameover-screen .go-stats .earnings-big { font-size: 36px !important; }
   #gameover-screen .restart-prompt { font-size: 18px !important; }
 
-  /* Rating popups - smaller on mobile, positioned higher */
-  .rating-popup { font-size: 18px !important; }
-  .rating-perfect { font-size: 22px !important; }
-  .rating-good, .rating-miss { font-size: 20px !important; }
+  /* Rating popups - smaller on mobile */
+  .rating-popup { font-size: 14px !important; }
+  .rating-perfect { font-size: 18px !important; }
+  .rating-good, .rating-miss { font-size: 15px !important; }
 
   /* Sponsor popup on mobile */
   .speed-popup { font-size: 24px !important; top: 30% !important; }
@@ -1414,7 +1414,7 @@ function showRating(type, y, earned) {
 
   const isMobile = window.innerWidth <= 600;
   const baseY = y || getCutLineY();
-  popup.style.top = (isMobile ? baseY - 120 : baseY - 60) + 'px';
+  popup.style.top = (isMobile ? baseY - 180 : baseY - 60) + 'px';
   container.appendChild(popup);
   setTimeout(() => popup.remove(), 1000);
 }
