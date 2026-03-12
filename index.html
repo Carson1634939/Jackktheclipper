@@ -604,31 +604,20 @@ body {
   width: 440px;
   left: 50%;
   transform: translateX(-50%);
-  background: #000;
+  background: transparent;
   border: none;
   border-radius: 0;
-  overflow: visible;
+  overflow: hidden;
   z-index: 15;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   transition: none;
 }
 
 .card-image {
-  position: absolute;
-  top: 8%;
-  left: 5%;
-  width: 70%;
-  height: 82%;
-  object-fit: cover;
-  z-index: 1;
-}
-
-.tv-frame-overlay {
-  position: relative;
   width: 100%;
   height: 100%;
   object-fit: fill;
-  pointer-events: none;
-  z-index: 2;
+  display: block;
 }
 
 /* Scene decorations */
@@ -1338,8 +1327,7 @@ const GAME_OVER_MESSAGES = [
   "JACK HAS BEEN\nEVICTED"
 ];
 
-const CLIP_IMAGES = ['./Clip1.jpg', './Clip2.jpg', './Clip3.jpg', './Clip4.jpg', './Clip5.jpg'];
-const TV_FRAMES = ['./Tv1.jpg', './Tv2.jpg'];
+const CLIP_IMAGES = ['./Clip1-revised.JPG', './Clip2-revised.jpg', './Clip3-revised.jpg', './Clip4-revised.jpg', './Clip5-revised.png'];
 let clipImageIndex = 0;
 
 const HIGHLIGHT_COLORS = ['#ffcc00', '#ff8844', '#ffaa22'];
@@ -1463,8 +1451,8 @@ function createCard() {
   cardEl.className = 'footage-card';
   cardEl.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
 
-  // Card height matches TV frame aspect ratio (~4:3)
-  const cardHeight = 340;
+  // Card height matches revised clip aspect ratio (1420:1024)
+  const cardHeight = 317;
   cardEl.style.height = cardHeight + 'px';
 
   // Vary clip window position across the card height for gameplay variety
@@ -1472,12 +1460,8 @@ function createCard() {
   const padding = 12;
   const cwBottom = padding + Math.random() * (cardHeight - 24 - padding * 2);
 
-  // Alternate TV frame overlay
-  const tvFrame = TV_FRAMES[clipImageIndex % TV_FRAMES.length];
-
   cardEl.innerHTML = `
     <img class="card-image" src="${imgSrc}" alt="clip footage" draggable="false">
-    <img class="tv-frame-overlay" src="${tvFrame}" alt="" draggable="false">
     <div class="clip-window" style="bottom: ${cwBottom}px;">
       <div class="clip-bracket-left"></div>
       <div class="clip-bracket-right"></div>
