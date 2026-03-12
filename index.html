@@ -148,18 +148,7 @@ body {
 
 /* CRT Scanline overlay */
 #scanlines {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
-  z-index: 1000;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.08) 2px,
-    rgba(0,0,0,0.08) 4px
-  );
-  animation: scanline 0.3s linear infinite;
+  display: none;
 }
 
 #scanlines::after {
@@ -1100,25 +1089,25 @@ class AudioEngine {
   _scheduleMusic() {
     const msPerBeat = 60000 / this.musicBPM / 2; // 8th notes
 
-    // Catchy chiptune melody pattern (pentatonic + octave jumps)
+    // Fun bouncy melody (major pentatonic, playful jumps)
     const melody = [
-      523, 587, 659, 784, 880, 784, 659, 587,  // C5 D5 E5 G5 A5 G5 E5 D5
-      523, 659, 784, 1047, 880, 784, 659, 523,  // C5 E5 G5 C6 A5 G5 E5 C5
-      392, 440, 523, 659, 784, 659, 523, 440,   // G4 A4 C5 E5 G5 E5 C5 A4
-      523, 784, 880, 1047, 880, 784, 659, 784,  // C5 G5 A5 C6 A5 G5 E5 G5
+      523, 0, 659, 784, 880, 0, 784, 659,      // C5 . E5 G5 A5 . G5 E5
+      523, 0, 784, 880, 1047, 0, 880, 784,      // C5 . G5 A5 C6 . A5 G5
+      659, 0, 784, 880, 1047, 0, 880, 1047,     // E5 . G5 A5 C6 . A5 C6
+      880, 0, 784, 659, 523, 0, 659, 523,       // A5 . G5 E5 C5 . E5 C5
     ];
 
-    // Bass line (root notes, lower octave)
+    // Bouncy bass (octave jumps for energy)
     const bass = [
-      131, 131, 131, 131, 175, 175, 175, 175,  // C3 C3 C3 C3 F3 F3 F3 F3
-      196, 196, 196, 196, 165, 165, 165, 165,  // G3 G3 G3 G3 E3 E3 E3 E3
-      131, 131, 131, 131, 175, 175, 175, 175,
-      196, 196, 196, 196, 131, 131, 131, 131,
+      131, 0, 262, 0, 175, 0, 349, 0,           // C3 . C4 . F3 . F4 .
+      196, 0, 392, 0, 165, 0, 330, 0,           // G3 . G4 . E3 . E4 .
+      131, 0, 262, 0, 175, 0, 349, 0,
+      196, 0, 392, 0, 131, 0, 262, 0,
     ];
 
-    // Rhythm accent pattern (kick on 1,3; snare on 2,4)
+    // Light percussion pattern
     const kick =  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
-    const snare = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
+    const hat =   [0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1];
 
     this.musicInterval = setInterval(() => {
       if (!this.ctx || this.ctx.state === 'closed') { this.stopMusic(); return; }
@@ -1126,38 +1115,43 @@ class AudioEngine {
       const i = this.musicStep % melody.length;
       const beatDur = 60 / this.musicBPM / 2;
 
-      // Melody - square wave chiptune
-      const mOsc = this.ctx.createOscillator();
-      const mGain = this.ctx.createGain();
-      mOsc.type = 'square';
-      mOsc.frequency.value = melody[i];
-      mGain.gain.setValueAtTime(0.06, t);
-      mGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
-      mOsc.connect(mGain);
-      mGain.connect(this.ctx.destination);
-      mOsc.start(t);
-      mOsc.stop(t + beatDur);
+      // Melody - soft triangle wave (warm, not harsh)
+      if (melody[i] > 0) {
+        const mOsc = this.ctx.createOscillator();
+        const mGain = this.ctx.createGain();
+        mOsc.type = 'triangle';
+        mOsc.frequency.value = melody[i];
+        mGain.gain.setValueAtTime(0.035, t);
+        mGain.gain.linearRampToValueAtTime(0.03, t + beatDur * 0.3);
+        mGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.85);
+        mOsc.connect(mGain);
+        mGain.connect(this.ctx.destination);
+        mOsc.start(t);
+        mOsc.stop(t + beatDur);
+      }
 
-      // Bass - triangle wave
-      const bOsc = this.ctx.createOscillator();
-      const bGain = this.ctx.createGain();
-      bOsc.type = 'triangle';
-      bOsc.frequency.value = bass[i];
-      bGain.gain.setValueAtTime(0.07, t);
-      bGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.9);
-      bOsc.connect(bGain);
-      bGain.connect(this.ctx.destination);
-      bOsc.start(t);
-      bOsc.stop(t + beatDur);
+      // Bass - sine wave (smooth, round)
+      if (bass[i] > 0) {
+        const bOsc = this.ctx.createOscillator();
+        const bGain = this.ctx.createGain();
+        bOsc.type = 'sine';
+        bOsc.frequency.value = bass[i];
+        bGain.gain.setValueAtTime(0.04, t);
+        bGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.8);
+        bOsc.connect(bGain);
+        bGain.connect(this.ctx.destination);
+        bOsc.start(t);
+        bOsc.stop(t + beatDur);
+      }
 
-      // Kick drum
+      // Soft kick
       if (kick[i]) {
         const kOsc = this.ctx.createOscillator();
         const kGain = this.ctx.createGain();
         kOsc.type = 'sine';
-        kOsc.frequency.setValueAtTime(150, t);
-        kOsc.frequency.exponentialRampToValueAtTime(40, t + 0.08);
-        kGain.gain.setValueAtTime(0.15, t);
+        kOsc.frequency.setValueAtTime(120, t);
+        kOsc.frequency.exponentialRampToValueAtTime(35, t + 0.08);
+        kGain.gain.setValueAtTime(0.07, t);
         kGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
         kOsc.connect(kGain);
         kGain.connect(this.ctx.destination);
@@ -1165,18 +1159,18 @@ class AudioEngine {
         kOsc.stop(t + 0.1);
       }
 
-      // Snare (noise-like)
-      if (snare[i]) {
-        const sOsc = this.ctx.createOscillator();
-        const sGain = this.ctx.createGain();
-        sOsc.type = 'sawtooth';
-        sOsc.frequency.value = 200 + Math.random() * 400;
-        sGain.gain.setValueAtTime(0.06, t);
-        sGain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
-        sOsc.connect(sGain);
-        sGain.connect(this.ctx.destination);
-        sOsc.start(t);
-        sOsc.stop(t + 0.06);
+      // Light hi-hat (soft sine tick)
+      if (hat[i]) {
+        const hOsc = this.ctx.createOscillator();
+        const hGain = this.ctx.createGain();
+        hOsc.type = 'sine';
+        hOsc.frequency.value = 800;
+        hGain.gain.setValueAtTime(0.015, t);
+        hGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+        hOsc.connect(hGain);
+        hGain.connect(this.ctx.destination);
+        hOsc.start(t);
+        hOsc.stop(t + 0.03);
       }
 
       this.musicStep++;
