@@ -642,14 +642,18 @@ body {
 .speed-popup {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 40%;
   z-index: 65;
   font-family: 'Press Start 2P', 'Courier New', monospace;
-  font-size: 14px;
-  color: var(--canyon-blue);
-  text-shadow: 0 0 15px rgba(100,150,200,0.8);
+  font-size: 36px;
+  background: linear-gradient(90deg, #ff0044, #ff8800, #ffff00, #00ff88, #0088ff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 100%;
+  animation: speedFlash 1.5s ease-out forwards, iridescentBg 0.5s linear infinite;
+  filter: drop-shadow(0 0 15px rgba(255,100,255,0.6)) drop-shadow(0 0 30px rgba(100,200,255,0.4));
   pointer-events: none;
-  animation: speedFlash 1.5s ease-out forwards;
   text-align: center;
   white-space: nowrap;
 }
@@ -939,10 +943,13 @@ body {
   #gameover-screen .go-stats .earnings-big { font-size: 36px !important; }
   #gameover-screen .restart-prompt { font-size: 18px !important; }
 
-  /* Rating popups - still big on mobile */
-  .rating-popup { font-size: 26px !important; }
-  .rating-perfect { font-size: 32px !important; }
-  .rating-good, .rating-miss { font-size: 28px !important; }
+  /* Rating popups - smaller on mobile, positioned higher */
+  .rating-popup { font-size: 18px !important; }
+  .rating-perfect { font-size: 22px !important; }
+  .rating-good, .rating-miss { font-size: 20px !important; }
+
+  /* Sponsor popup on mobile */
+  .speed-popup { font-size: 24px !important; top: 30% !important; }
 
   /* Scissors on cut line */
   #cut-line::before { font-size: 16px; left: -18px; }
@@ -1405,7 +1412,9 @@ function showRating(type, y, earned) {
     popup.textContent = '❌ MISS';
   }
 
-  popup.style.top = (y || getCutLineY()) + 'px';
+  const isMobile = window.innerWidth <= 600;
+  const baseY = y || getCutLineY();
+  popup.style.top = (isMobile ? baseY - 80 : baseY) + 'px';
   container.appendChild(popup);
   setTimeout(() => popup.remove(), 1000);
 }
