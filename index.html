@@ -884,9 +884,9 @@ body {
   #cut-line { width: 94vw; }
   .cut-line-glow { width: 95vw; }
 
-  /* Smaller cut-line position for mobile */
-  #cut-line { bottom: 100px; }
-  .cut-line-glow { bottom: 98px; }
+  /* Cut-line higher on mobile so it's not hidden by in-app browsers */
+  #cut-line { bottom: 35vh; }
+  .cut-line-glow { bottom: calc(35vh - 2px); }
 
   /* HUD compact */
   #hud {
@@ -908,15 +908,8 @@ body {
   .scene-jack-mom,
   .scene-sponsor-board { display: none; }
 
-  /* Wallet - smaller and repositioned */
-  #phantom-wallet {
-    width: 45vw;
-    top: 46px;
-    right: 4px;
-  }
-  .wallet-balance { font-size: 28px !important; }
-  .wallet-sponsors { font-size: 10px !important; }
-  .wallet-sponsor-count { font-size: 12px !important; }
+  /* Hide wallet on mobile - HUD has all the info */
+  #phantom-wallet { display: none !important; }
 
   /* Jack sprite smaller */
   #jack-sprite { transform: translateX(-50%) scale(0.7); bottom: 8px; }
