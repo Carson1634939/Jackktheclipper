@@ -1255,8 +1255,10 @@ let animFrameId = null;
 const MAX_SPONSORS = 5;
 let activeSponsorCount = 0;
 
-function getEarningsMultiplier() {
-  return 1 + activeSponsorCount * 0.25; // Each sponsor adds 25% more
+const BASE_EARNINGS = [50, 100, 250, 500, 750, 1000];
+
+function getBaseEarning() {
+  return BASE_EARNINGS[Math.min(activeSponsorCount, BASE_EARNINGS.length - 1)];
 }
 
 function addSponsor() {
@@ -1272,7 +1274,7 @@ function updateWalletSponsors() {
   const countEl = document.getElementById('wallet-sponsor-count');
   const rateEl = document.getElementById('wallet-rate');
   if (countEl) countEl.textContent = activeSponsorCount;
-  if (rateEl) rateEl.textContent = `x${getEarningsMultiplier().toFixed(2)}`;
+  if (rateEl) rateEl.textContent = `$${getBaseEarning()}`;
 }
 
 // DOM elements
@@ -1522,14 +1524,14 @@ function handleClip() {
     bestCard.el.style.opacity = '0.3';
     bestCard.el.style.transition = 'opacity 0.3s';
 
-    const mult = getEarningsMultiplier();
+    const base = getBaseEarning();
     if (bestType === 'perfect') {
-      const earned = Math.round(150 * mult);
+      const earned = Math.round(base * 1.5);
       money += earned;
       audio.playPerfect();
       showRating('perfect', null, earned);
     } else {
-      const earned = Math.round(75 * mult);
+      const earned = base;
       money += earned;
       audio.playClip();
       showRating('good', null, earned);
@@ -1541,7 +1543,7 @@ function handleClip() {
 
     // Streak bonus every 5
     if (streak > 0 && streak % 5 === 0) {
-      const bonus = Math.round(200 * mult);
+      const bonus = Math.round(base * 2);
       money += bonus;
       showStreakBonus();
       audio.playStreak();
