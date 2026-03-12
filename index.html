@@ -1414,7 +1414,7 @@ function showRating(type, y, earned) {
 
   const isMobile = window.innerWidth <= 600;
   const baseY = y || getCutLineY();
-  popup.style.top = (isMobile ? baseY - 80 : baseY) + 'px';
+  popup.style.top = (isMobile ? baseY - 120 : baseY - 60) + 'px';
   container.appendChild(popup);
   setTimeout(() => popup.remove(), 1000);
 }
