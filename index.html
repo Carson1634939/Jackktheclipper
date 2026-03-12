@@ -614,19 +614,23 @@ body {
 }
 
 .card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  position: absolute;
+  top: 10%;
+  left: 6%;
+  width: 68%;
+  height: 80%;
+  object-fit: cover;
   display: block;
   background: #000;
+  z-index: 1;
 }
 
 .tv-frame-overlay {
   position: absolute;
-  top: -10%;
-  left: -5%;
-  width: 110%;
-  height: 120%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: fill;
   pointer-events: none;
   z-index: 2;
@@ -1465,8 +1469,8 @@ function createCard() {
   cardEl.className = 'footage-card';
   cardEl.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
 
-  // Card height uses 16:9 aspect ratio (440px wide -> 248px tall)
-  const cardHeight = 248;
+  // Card height matches TV frame aspect ratio (~4:3, 440px wide -> 330px tall)
+  const cardHeight = 330;
   cardEl.style.height = cardHeight + 'px';
 
   // Vary clip window position across the card height for gameplay variety
