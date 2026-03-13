@@ -439,12 +439,6 @@ body {
   animation: moneyTick 0.3s ease;
 }
 
-#sponsor-hud {
-  color: var(--canyon-blue);
-  min-width: 120px;
-  text-align: center;
-}
-
 #streak {
   color: var(--neon-flicker);
   min-width: 80px;
@@ -505,9 +499,9 @@ body {
 }
 
 .scene-sponsor-board {
-  left: 5%;
+  left: 2%;
   top: 8%;
-  width: 380px;
+  width: 500px;
   height: auto;
 }
 
@@ -899,7 +893,6 @@ body {
     height: 56px;
   }
   #hud #money { font-size: 32px; min-width: 100px; font-weight: bold; }
-  #hud #sponsor-hud { font-size: 14px; min-width: 90px; }
   #hud #streak { font-size: 16px; min-width: 50px; }
   .life-crown { font-size: 20px; }
 
@@ -955,7 +948,7 @@ body {
   .scene-jack-clipit { width: 280px; }
   .scene-plant-beer { width: 260px; }
   .scene-jack-mom { width: 180px; }
-  .scene-sponsor-board { width: 240px; }
+  .scene-sponsor-board { width: 320px; }
 
   #phantom-wallet { width: 220px; }
   .wallet-balance { font-size: 36px !important; }
@@ -971,7 +964,7 @@ body {
     <img src="./JackClipIt.jpg" class="scene-decor scene-jack-clipit" alt="Jack Clip It" draggable="false">
     <img src="./PlantAndBeer.jpg" class="scene-decor scene-plant-beer" alt="Plant and Beer" draggable="false">
     <img src="./JackandMom.jpg" class="scene-decor scene-jack-mom" alt="Jack and Mom" draggable="false">
-    <img id="sponsor-board" src="./Sponsor0.jpg" class="scene-decor scene-sponsor-board" alt="Sponsor Board" draggable="false">
+    <img src="./Sponsor0.jpg" class="scene-decor scene-sponsor-board" alt="Jack's Board" draggable="false">
   </div>
 
   <!-- Phantom Wallet -->
@@ -981,8 +974,7 @@ body {
       <div class="wallet-overlay">
         <div class="wallet-balance" id="wallet-balance">$0</div>
         <div class="wallet-sponsors">
-          SPONSORS: <span class="wallet-sponsor-count" id="wallet-sponsor-count">0</span>
-          &nbsp; | &nbsp; RATE: <span class="wallet-sponsor-count" id="wallet-rate">x1</span>
+          RATE: <span class="wallet-sponsor-count" id="wallet-rate">$50</span>
         </div>
       </div>
     </div>
@@ -1019,7 +1011,6 @@ body {
   <div id="hud" style="display:none;">
     <div id="lives"></div>
     <div id="money">👑 $0</div>
-    <div id="sponsor-hud">💰 0 Sponsors</div>
     <div id="streak">🔥 0</div>
   </div>
 
@@ -1177,9 +1168,8 @@ class AudioEngine {
     }, msPerBeat);
   }
 
-  setMusicSpeed(sponsorCount) {
-    // Speed up BPM with each sponsor: 140 -> 160 -> 180 -> 200 -> 220 -> 240
-    this.musicBPM = 140 + sponsorCount * 20;
+  setMusicSpeed(level) {
+    this.musicBPM = 140 + level * 20;
     if (this.musicInterval) {
       clearInterval(this.musicInterval);
       this.musicInterval = null;
@@ -1333,30 +1323,25 @@ let cards = [];
 let cardIdCounter = 0;
 let animFrameId = null;
 
-// Sponsor system
-const MAX_SPONSORS = 5;
-let activeSponsorCount = 0;
+// Progression system (time-based)
+const MAX_LEVEL = 5;
+let gameLevel = 0;
 
 const BASE_EARNINGS = [50, 100, 250, 500, 750, 1000];
 
 function getBaseEarning() {
-  return BASE_EARNINGS[Math.min(activeSponsorCount, BASE_EARNINGS.length - 1)];
+  return BASE_EARNINGS[Math.min(gameLevel, BASE_EARNINGS.length - 1)];
 }
 
-function addSponsor() {
-  if (activeSponsorCount >= MAX_SPONSORS) return;
-  activeSponsorCount++;
-  // Update sponsor board image
-  const board = document.getElementById('sponsor-board');
-  if (board) board.src = `./Sponsor${activeSponsorCount}.jpg`;
-  audio.setMusicSpeed(activeSponsorCount);
-  updateWalletSponsors();
+function levelUp() {
+  if (gameLevel >= MAX_LEVEL) return;
+  gameLevel++;
+  audio.setMusicSpeed(gameLevel);
+  updateWalletRate();
 }
 
-function updateWalletSponsors() {
-  const countEl = document.getElementById('wallet-sponsor-count');
+function updateWalletRate() {
   const rateEl = document.getElementById('wallet-rate');
-  if (countEl) countEl.textContent = activeSponsorCount;
   if (rateEl) rateEl.textContent = `$${getBaseEarning()}`;
 }
 
@@ -1366,7 +1351,6 @@ const lane = document.getElementById('lane');
 const hud = document.getElementById('hud');
 const livesEl = document.getElementById('lives');
 const moneyEl = document.getElementById('money');
-const sponsorHudEl = document.getElementById('sponsor-hud');
 const streakEl = document.getElementById('streak');
 const startScreen = document.getElementById('start-screen');
 const gameoverScreen = document.getElementById('gameover-screen');
@@ -1472,10 +1456,6 @@ function updateStreak() {
   streakEl.textContent = `🔥 ${streak}`;
 }
 
-function updateSponsorHud() {
-  sponsorHudEl.textContent = `💰 ${activeSponsorCount} Sponsor${activeSponsorCount !== 1 ? 's' : ''}`;
-}
-
 // ============= VISUAL EFFECTS =============
 function showRating(type, y, earned) {
   const popup = document.createElement('div');
@@ -1519,14 +1499,6 @@ function showStreakBonus() {
   setTimeout(() => flash.remove(), 500);
 }
 
-function showSponsorWarning() {
-  const popup = document.createElement('div');
-  popup.className = 'speed-popup';
-  popup.textContent = `NEW SPONSOR 💰`;
-  container.appendChild(popup);
-  setTimeout(() => popup.remove(), 1500);
-}
-
 function shakeScreen() {
   container.classList.remove('shaking');
   void container.offsetWidth;
@@ -1559,15 +1531,15 @@ function jackReact(type) {
 
 // ============= GAME LOGIC =============
 function getCurrentSpeed() {
-  return baseSpeed + activeSponsorCount * 1.0;
+  return baseSpeed + gameLevel * 1.0;
 }
 
 function getCurrentSpawnInterval() {
-  return Math.max(300, spawnInterval - activeSponsorCount * 300);
+  return Math.max(300, spawnInterval - gameLevel * 300);
 }
 
 function getCurrentMinGap() {
-  return Math.max(4, 40 - activeSponsorCount * 8);
+  return Math.max(4, 40 - gameLevel * 8);
 }
 
 function handleClip() {
@@ -1690,8 +1662,6 @@ function gameOver() {
     <div><span class="stat-label">CLIPS COMPLETED</span><span class="stat-value">${totalClips}</span></div>
     <hr class="stat-divider">
     <div><span class="stat-label">LONGEST STREAK</span><span class="stat-value">🔥 ${longestStreak}</span></div>
-    <hr class="stat-divider">
-    <div><span class="stat-label">SPONSORS</span><span class="stat-value">💰 ${activeSponsorCount}</span></div>
   `;
 
   gameoverScreen.classList.add('active');
@@ -1719,10 +1689,8 @@ function startGame() {
   // Clear any leftover cards
   lane.querySelectorAll('.footage-card').forEach(el => el.remove());
 
-  // Reset sponsors
-  activeSponsorCount = 0;
-  const board = document.getElementById('sponsor-board');
-  if (board) board.src = './Sponsor0.jpg';
+  // Reset progression
+  gameLevel = 0;
 
   startScreen.style.display = 'none';
   gameoverScreen.classList.remove('active');
@@ -1733,8 +1701,7 @@ function startGame() {
   updateLives();
   updateMoney();
   updateStreak();
-  updateSponsorHud();
-  updateWalletSponsors();
+  updateWalletRate();
 
   audio.init();
   audio.startMusic();
@@ -1748,12 +1715,10 @@ function gameLoop(timestamp) {
 
   const now = timestamp;
 
-  // New sponsor every 15 seconds (increases speed + earnings)
+  // Level up every 15 seconds (increases speed + earnings)
   if (now - lastSpeedIncreaseTime > 15000) {
     lastSpeedIncreaseTime = now;
-    addSponsor();
-    updateSponsorHud();
-    showSponsorWarning();
+    levelUp();
   }
 
   // Spawn cards - only if enough gap from the last card
