@@ -791,7 +791,8 @@ body {
 }
 
 #social-card-canvas {
-  width: 420px;
+  width: 700px;
+  max-width: 90vw;
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.6);
@@ -815,27 +816,6 @@ body {
   border-color: var(--crown-gold);
 }
 
-/* Slumped Jack on game over */
-.gameover-jack {
-  margin: 15px 0;
-  position: relative;
-}
-
-.gameover-jack .jack-crown {
-  transform: translateX(-50%) rotate(15deg) !important;
-  left: calc(50% + 8px) !important;
-}
-
-.gameover-jack .jack-visor {
-  opacity: 0.3 !important;
-  box-shadow: none !important;
-  animation: none !important;
-  background: #444 !important;
-}
-
-.gameover-jack .jack-body {
-  transform: translateY(5px);
-}
 
 /* ============= PHANTOM WALLET ============= */
 #phantom-wallet {
@@ -949,7 +929,7 @@ body {
   #gameover-screen .go-stats { padding: 12px !important; min-width: unset !important; width: 85vw; }
   #gameover-screen .go-stats .earnings-big { font-size: 36px !important; }
   #gameover-screen .restart-prompt { font-size: 18px !important; }
-  #social-card-canvas { width: 90vw; max-width: 360px; }
+  #social-card-canvas { width: 95vw; max-width: 500px; }
   #copy-card-btn { font-size: 10px; padding: 6px 16px; }
 
   /* Rating popups - smaller on mobile */
@@ -1057,19 +1037,6 @@ body {
   <!-- Game Over Screen -->
   <div id="gameover-screen">
     <div class="go-title" id="go-title"></div>
-    <div class="gameover-jack">
-      <div class="jack-body" style="margin:0 auto;width:80px;height:90px;position:relative;transform:translateY(5px);">
-        <div class="jack-crown" style="position:absolute;bottom:76px;left:calc(50% + 8px);transform:translateX(-50%) rotate(15deg);z-index:2;width:36px;height:18px;">
-          <svg viewBox="0 0 36 18"><polygon points="2,18 6,4 12,12 18,0 24,12 30,4 34,18" fill="#ffd700" stroke="#daa520" stroke-width="1"/><circle cx="12" cy="14" r="2" fill="#ff4444"/><circle cx="18" cy="12" r="2" fill="#44ff44"/><circle cx="24" cy="14" r="2" fill="#4444ff"/></svg>
-        </div>
-        <div class="jack-hair" style="position:absolute;bottom:56px;left:50%;transform:translateX(-50%);width:44px;height:24px;background:#888;border-radius:50% 50% 0 0;z-index:1;"></div>
-        <div class="jack-head" style="position:absolute;bottom:42px;left:50%;transform:translateX(-50%);width:36px;height:32px;background:#c49880;border-radius:50% 50% 45% 45%;"></div>
-        <div class="jack-visor" style="position:absolute;bottom:52px;left:50%;transform:translateX(-50%);width:42px;height:14px;border-radius:20px;background:#444;opacity:0.3;z-index:2;"></div>
-        <div class="jack-torso" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60px;height:50px;background:#1a1a22;border-radius:8px 8px 4px 4px;border:1px solid #2a2a35;"></div>
-        <div class="jack-arm-left" style="position:absolute;bottom:8px;left:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(15deg);"></div>
-        <div class="jack-arm-right" style="position:absolute;bottom:8px;right:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(-15deg);"></div>
-      </div>
-    </div>
     <div class="go-stats" id="go-stats" style="display:none;"></div>
     <div id="social-card-wrap">
       <canvas id="social-card-canvas"></canvas>
@@ -1686,26 +1653,27 @@ function renderSocialCard() {
   const w = canvas.width;
   const h = canvas.height;
 
-  // Draw dollar amount — large, bold, black, positioned below "TOTAL EARNED" / "$"
-  // From the filled example: the amount sits right after the "$" sign at roughly x=28%, y=18%
+  // Text styling — black, pixel font to match template
   ctx.fillStyle = '#000000';
-  ctx.textAlign = 'left';
 
-  // Dollar amount (large)
-  const dollarSize = Math.round(w * 0.09);
+  // Dollar amount — large, positioned right after the template's "$" sign
+  const dollarSize = Math.round(w * 0.075);
   ctx.font = `bold ${dollarSize}px 'Press Start 2P', monospace`;
-  const amountText = `$${money.toLocaleString()}`;
-  ctx.fillText(amountText, w * 0.24, h * 0.24);
+  ctx.textAlign = 'left';
+  const amountText = money.toLocaleString();
+  // The template "$" is at ~x=24%. Draw the number starting just after it
+  ctx.fillText(amountText, w * 0.30, h * 0.215);
 
-  // Stats text — smaller, positioned to the right of the dot leaders
-  const statSize = Math.round(w * 0.028);
+  // Stats numbers — right-aligned at the end of the dot leaders
+  const statSize = Math.round(w * 0.025);
   ctx.font = `bold ${statSize}px 'Press Start 2P', monospace`;
+  ctx.textAlign = 'right';
 
-  // Clips completed — number after the dots
-  ctx.fillText(String(totalClips), w * 0.62, h * 0.335);
+  // Clips completed — number at end of dots row
+  ctx.fillText(String(totalClips), w * 0.66, h * 0.305);
 
-  // Longest streak — number after the dots
-  ctx.fillText(String(longestStreak), w * 0.62, h * 0.385);
+  // Longest streak — number at end of dots row
+  ctx.fillText(String(longestStreak), w * 0.66, h * 0.345);
 }
 
 function copySocialCard() {
