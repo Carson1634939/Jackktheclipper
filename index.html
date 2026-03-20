@@ -783,6 +783,38 @@ body {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+#social-card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+#social-card-canvas {
+  width: 420px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+}
+
+#copy-card-btn {
+  margin-top: 10px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(60,60,80,0.7);
+  border: 2px solid rgba(255,215,0,0.5);
+  border-radius: 6px;
+  padding: 8px 22px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s, border-color 0.2s;
+}
+#copy-card-btn:hover {
+  background: rgba(80,80,110,0.9);
+  border-color: var(--crown-gold);
+}
+
 /* Slumped Jack on game over */
 .gameover-jack {
   margin: 15px 0;
@@ -917,6 +949,8 @@ body {
   #gameover-screen .go-stats { padding: 12px !important; min-width: unset !important; width: 85vw; }
   #gameover-screen .go-stats .earnings-big { font-size: 36px !important; }
   #gameover-screen .restart-prompt { font-size: 18px !important; }
+  #social-card-canvas { width: 90vw; max-width: 360px; }
+  #copy-card-btn { font-size: 10px; padding: 6px 16px; }
 
   /* Rating popups - smaller on mobile */
   .rating-popup { font-size: 14px !important; }
@@ -1036,7 +1070,11 @@ body {
         <div class="jack-arm-right" style="position:absolute;bottom:8px;right:4px;width:14px;height:35px;background:#1a1a22;border-radius:6px;border:1px solid #2a2a35;transform:rotate(-15deg);"></div>
       </div>
     </div>
-    <div class="go-stats" id="go-stats"></div>
+    <div class="go-stats" id="go-stats" style="display:none;"></div>
+    <div id="social-card-wrap">
+      <canvas id="social-card-canvas"></canvas>
+      <button id="copy-card-btn" onclick="copySocialCard()">COPY CARD</button>
+    </div>
     <div class="restart-prompt">[ <span class="desktop-only">PRESS SPACEBAR</span><span class="mobile-only">TAP</span> TO TRY AGAIN ]</div>
   </div>
 
@@ -1628,6 +1666,85 @@ function cardPassedWithoutClip(card) {
   }
 }
 
+// ============= SOCIAL CARD =============
+const socialCardImg = new Image();
+socialCardImg.src = './Socialcardtemplate.jpg';
+
+function renderSocialCard() {
+  const canvas = document.getElementById('social-card-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = socialCardImg;
+
+  // Use native image size for crisp rendering
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+
+  // Draw template background
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Scale factor (image is ~1300px wide based on screenshots)
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Draw dollar amount — large, bold, black, positioned below "TOTAL EARNED" / "$"
+  // From the filled example: the amount sits right after the "$" sign at roughly x=28%, y=18%
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'left';
+
+  // Dollar amount (large)
+  const dollarSize = Math.round(w * 0.09);
+  ctx.font = `bold ${dollarSize}px 'Press Start 2P', monospace`;
+  const amountText = `$${money.toLocaleString()}`;
+  ctx.fillText(amountText, w * 0.24, h * 0.24);
+
+  // Stats text — smaller, positioned to the right of the dot leaders
+  const statSize = Math.round(w * 0.028);
+  ctx.font = `bold ${statSize}px 'Press Start 2P', monospace`;
+
+  // Clips completed — number after the dots
+  ctx.fillText(String(totalClips), w * 0.62, h * 0.335);
+
+  // Longest streak — number after the dots
+  ctx.fillText(String(longestStreak), w * 0.62, h * 0.385);
+}
+
+function copySocialCard() {
+  const canvas = document.getElementById('social-card-canvas');
+  const btn = document.getElementById('copy-card-btn');
+
+  canvas.toBlob(function(blob) {
+    if (!blob) { btn.textContent = 'FAILED'; return; }
+
+    if (navigator.clipboard && navigator.clipboard.write) {
+      navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]).then(function() {
+        btn.textContent = 'COPIED!';
+        setTimeout(function() { btn.textContent = 'COPY CARD'; }, 2000);
+      }).catch(function() {
+        // Fallback: download instead
+        downloadSocialCard(blob, btn);
+      });
+    } else {
+      // Fallback: download the image
+      downloadSocialCard(blob, btn);
+    }
+  }, 'image/png');
+}
+
+function downloadSocialCard(blob, btn) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'jack-the-clipper-score.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  btn.textContent = 'SAVED!';
+  setTimeout(function() { btn.textContent = 'COPY CARD'; }, 2000);
+}
+
 function gameOver() {
   gameState = 'gameover';
   audio.stopMusic();
@@ -1656,6 +1773,13 @@ function gameOver() {
   `;
 
   gameoverScreen.classList.add('active');
+
+  // Render social share card
+  if (socialCardImg.complete) {
+    renderSocialCard();
+  } else {
+    socialCardImg.onload = renderSocialCard;
+  }
 
   if (animFrameId) {
     cancelAnimationFrame(animFrameId);
