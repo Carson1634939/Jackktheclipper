@@ -1661,11 +1661,9 @@ function renderSocialCard() {
   ctx.font = `${Math.round(46.9 * sy)}px 'Press Start 2P', monospace`;
   ctx.fillText('TOTAL EARNED', cx, (67.7 + 46.9) * sy);
 
-  // Dollar amount — Press Start 2P, 70px, green, centered
-  ctx.fillStyle = '#00ad5a';
+  // Dollar amount — Press Start 2P, 70px, centered
   ctx.font = `${Math.round(70 * sy)}px 'Press Start 2P', monospace`;
   ctx.fillText('$' + money.toLocaleString(), cx, (159 + 70) * sy);
-  ctx.fillStyle = '#000000';
 
   // "Clips completed" line — Handjet Medium, 25px, centered
   ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
