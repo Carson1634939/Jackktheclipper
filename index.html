@@ -817,6 +817,19 @@ body {
 }
 
 
+/* ============= MUSIC CREDIT ============= */
+#music-credit {
+  position: fixed;
+  bottom: 6px;
+  right: 10px;
+  font-family: 'VT323', 'Courier New', monospace;
+  font-size: 13px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* ============= PHANTOM WALLET ============= */
 #phantom-wallet {
   position: absolute;
@@ -1045,6 +1058,9 @@ body {
     <div class="restart-prompt">[ <span class="desktop-only">PRESS SPACEBAR</span><span class="mobile-only">TAP</span> TO PLAY AGAIN ]</div>
   </div>
 
+  <!-- Music Credit -->
+  <div id="music-credit">&#9835; &ldquo;Funk Modulator&rdquo; by RoccoW &mdash; Free Music Archive (CC BY)</div>
+
   <!-- CRT Scanlines -->
   <div id="scanlines"></div>
 </div>
@@ -1055,128 +1071,62 @@ class AudioEngine {
   constructor() {
     this.ctx = null;
     this.initialized = false;
-    this.musicInterval = null;
-    this.musicBPM = 140;
-    this.musicStep = 0;
+    this.bgm = null;
+    this.bgmSource = null;
+    this.bgmGain = null;
+    this.bgmBuffer = null;
+    this.bgmPlaying = false;
+    this.bgmStartOffset = 0;
+    this.bgmStartTime = 0;
+    this.bgmRate = 1.0;
   }
 
   init() {
     if (this.initialized) return;
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     this.initialized = true;
+    this._loadBGM();
+  }
+
+  async _loadBGM() {
+    try {
+      const resp = await fetch('RoccoW - Funk Modulator.mp3');
+      const buf = await resp.arrayBuffer();
+      this.bgmBuffer = await this.ctx.decodeAudioData(buf);
+    } catch (e) {
+      console.warn('Could not load background music:', e);
+    }
   }
 
   startMusic() {
-    if (this.musicInterval) return;
-    this.musicStep = 0;
-    this.musicBPM = 140;
-    this._scheduleMusic();
-  }
+    if (this.bgmPlaying || !this.bgmBuffer) return;
+    this.bgmGain = this.ctx.createGain();
+    this.bgmGain.gain.value = 0.35;
+    this.bgmGain.connect(this.ctx.destination);
 
-  _scheduleMusic() {
-    const msPerBeat = 60000 / this.musicBPM / 2; // 8th notes
-
-    // Fun bouncy melody (major pentatonic, playful jumps)
-    const melody = [
-      523, 0, 659, 784, 880, 0, 784, 659,      // C5 . E5 G5 A5 . G5 E5
-      523, 0, 784, 880, 1047, 0, 880, 784,      // C5 . G5 A5 C6 . A5 G5
-      659, 0, 784, 880, 1047, 0, 880, 1047,     // E5 . G5 A5 C6 . A5 C6
-      880, 0, 784, 659, 523, 0, 659, 523,       // A5 . G5 E5 C5 . E5 C5
-    ];
-
-    // Bouncy bass (octave jumps for energy)
-    const bass = [
-      131, 0, 262, 0, 175, 0, 349, 0,           // C3 . C4 . F3 . F4 .
-      196, 0, 392, 0, 165, 0, 330, 0,           // G3 . G4 . E3 . E4 .
-      131, 0, 262, 0, 175, 0, 349, 0,
-      196, 0, 392, 0, 131, 0, 262, 0,
-    ];
-
-    // Light percussion pattern
-    const kick =  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
-    const hat =   [0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1];
-
-    this.musicInterval = setInterval(() => {
-      if (!this.ctx || this.ctx.state === 'closed') { this.stopMusic(); return; }
-      const t = this.ctx.currentTime;
-      const i = this.musicStep % melody.length;
-      const beatDur = 60 / this.musicBPM / 2;
-
-      // Melody - soft triangle wave (warm, not harsh)
-      if (melody[i] > 0) {
-        const mOsc = this.ctx.createOscillator();
-        const mGain = this.ctx.createGain();
-        mOsc.type = 'triangle';
-        mOsc.frequency.value = melody[i];
-        mGain.gain.setValueAtTime(0.035, t);
-        mGain.gain.linearRampToValueAtTime(0.03, t + beatDur * 0.3);
-        mGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.85);
-        mOsc.connect(mGain);
-        mGain.connect(this.ctx.destination);
-        mOsc.start(t);
-        mOsc.stop(t + beatDur);
-      }
-
-      // Bass - sine wave (smooth, round)
-      if (bass[i] > 0) {
-        const bOsc = this.ctx.createOscillator();
-        const bGain = this.ctx.createGain();
-        bOsc.type = 'sine';
-        bOsc.frequency.value = bass[i];
-        bGain.gain.setValueAtTime(0.04, t);
-        bGain.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 0.8);
-        bOsc.connect(bGain);
-        bGain.connect(this.ctx.destination);
-        bOsc.start(t);
-        bOsc.stop(t + beatDur);
-      }
-
-      // Soft kick
-      if (kick[i]) {
-        const kOsc = this.ctx.createOscillator();
-        const kGain = this.ctx.createGain();
-        kOsc.type = 'sine';
-        kOsc.frequency.setValueAtTime(120, t);
-        kOsc.frequency.exponentialRampToValueAtTime(35, t + 0.08);
-        kGain.gain.setValueAtTime(0.07, t);
-        kGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-        kOsc.connect(kGain);
-        kGain.connect(this.ctx.destination);
-        kOsc.start(t);
-        kOsc.stop(t + 0.1);
-      }
-
-      // Light hi-hat (soft sine tick)
-      if (hat[i]) {
-        const hOsc = this.ctx.createOscillator();
-        const hGain = this.ctx.createGain();
-        hOsc.type = 'sine';
-        hOsc.frequency.value = 800;
-        hGain.gain.setValueAtTime(0.015, t);
-        hGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-        hOsc.connect(hGain);
-        hGain.connect(this.ctx.destination);
-        hOsc.start(t);
-        hOsc.stop(t + 0.03);
-      }
-
-      this.musicStep++;
-    }, msPerBeat);
+    this.bgmSource = this.ctx.createBufferSource();
+    this.bgmSource.buffer = this.bgmBuffer;
+    this.bgmSource.loop = true;
+    this.bgmSource.playbackRate.value = this.bgmRate;
+    this.bgmSource.connect(this.bgmGain);
+    this.bgmSource.start(0, this.bgmStartOffset);
+    this.bgmStartTime = this.ctx.currentTime;
+    this.bgmPlaying = true;
   }
 
   setMusicSpeed(level) {
-    this.musicBPM = 140 + level * 20;
-    if (this.musicInterval) {
-      clearInterval(this.musicInterval);
-      this.musicInterval = null;
-      this._scheduleMusic();
+    this.bgmRate = 1.0 + level * 0.08;
+    if (this.bgmSource) {
+      this.bgmSource.playbackRate.value = this.bgmRate;
     }
   }
 
   stopMusic() {
-    if (this.musicInterval) {
-      clearInterval(this.musicInterval);
-      this.musicInterval = null;
+    if (this.bgmSource && this.bgmPlaying) {
+      this.bgmStartOffset = ((this.ctx.currentTime - this.bgmStartTime) * this.bgmRate + this.bgmStartOffset) % (this.bgmBuffer ? this.bgmBuffer.duration : 1);
+      this.bgmSource.stop();
+      this.bgmSource = null;
+      this.bgmPlaying = false;
     }
   }
 
