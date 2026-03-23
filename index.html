@@ -1663,8 +1663,6 @@ function shareSocialCard(blob, btn) {
   const file = new File([blob], 'jack-the-clipper-score.png', { type: 'image/png' });
   if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     navigator.share({
-      title: 'Jack the Clipper',
-      text: 'Check out my score!',
       files: [file]
     }).then(function() {
       btn.textContent = 'SHARED!';
