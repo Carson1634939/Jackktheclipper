@@ -1654,23 +1654,24 @@ function renderSocialCard() {
   const sy = canvas.height / 900;
 
   ctx.fillStyle = '#000000';
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
+  const cx = canvas.width / 2;
 
-  // "TOTAL EARNED" label — Press Start 2P, 46.9px at (275.2, 67.7)
+  // "TOTAL EARNED" label — Press Start 2P, 46.9px, centered
   ctx.font = `${Math.round(46.9 * sy)}px 'Press Start 2P', monospace`;
-  ctx.fillText('TOTAL EARNED', 275.2 * sx, (67.7 + 46.9) * sy);
+  ctx.fillText('TOTAL EARNED', cx, (67.7 + 46.9) * sy);
 
-  // Dollar amount — Press Start 2P, 46.9px at (431.3, 159)
+  // Dollar amount — Press Start 2P, 46.9px, centered
   ctx.font = `${Math.round(46.9 * sy)}px 'Press Start 2P', monospace`;
-  ctx.fillText('$' + money.toLocaleString(), 431.3 * sx, (159 + 46.9) * sy);
+  ctx.fillText('$' + money.toLocaleString(), cx, (159 + 46.9) * sy);
 
-  // "Clips completed" line — Handjet Medium, 25px at (431.3, 247.4)
+  // "Clips completed" line — Handjet Medium, 25px, centered
   ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
-  ctx.fillText('Clips completed.......................................' + totalClips, 431.3 * sx, (247.4 + 25) * sy);
+  ctx.fillText('Clips completed.......................................' + totalClips, cx, (247.4 + 25) * sy);
 
-  // "Longest streak" line — Handjet Medium, 25px at (431.3, 286.7)
+  // "Longest streak" line — Handjet Medium, 25px, centered
   ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
-  ctx.fillText('Longest streak........................................' + longestStreak, 431.3 * sx, (286.7 + 25) * sy);
+  ctx.fillText('Longest streak........................................' + longestStreak, cx, (286.7 + 25) * sy);
 }
 
 function copySocialCard() {
