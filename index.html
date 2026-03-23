@@ -1079,6 +1079,7 @@ class AudioEngine {
     this.bgmStartOffset = 0;
     this.bgmStartTime = 0;
     this.bgmRate = 1.0;
+    this.bgmWantsPlay = false;
   }
 
   init() {
@@ -1093,12 +1094,21 @@ class AudioEngine {
       const resp = await fetch('RoccoW - Funk Modulator.mp3');
       const buf = await resp.arrayBuffer();
       this.bgmBuffer = await this.ctx.decodeAudioData(buf);
+      if (this.bgmWantsPlay && !this.bgmPlaying) {
+        this._playBGM();
+      }
     } catch (e) {
       console.warn('Could not load background music:', e);
     }
   }
 
   startMusic() {
+    this.bgmWantsPlay = true;
+    if (this.bgmPlaying || !this.bgmBuffer) return;
+    this._playBGM();
+  }
+
+  _playBGM() {
     if (this.bgmPlaying || !this.bgmBuffer) return;
     this.bgmGain = this.ctx.createGain();
     this.bgmGain.gain.value = 0.35;
@@ -1122,6 +1132,7 @@ class AudioEngine {
   }
 
   stopMusic() {
+    this.bgmWantsPlay = false;
     if (this.bgmSource && this.bgmPlaying) {
       this.bgmStartOffset = ((this.ctx.currentTime - this.bgmStartTime) * this.bgmRate + this.bgmStartOffset) % (this.bgmBuffer ? this.bgmBuffer.duration : 1);
       this.bgmSource.stop();
