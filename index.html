@@ -1627,15 +1627,15 @@ function renderSocialCard() {
 
   // Dollar amount — Press Start 2P, 70px, centered
   ctx.font = `${Math.round(70 * sy)}px 'Press Start 2P', monospace`;
-  ctx.fillText('$' + money.toLocaleString(), cx, (169 + 70) * sy);
+  ctx.fillText('$' + money.toLocaleString(), cx, (185.9 + 70) * sy);
 
   // "Clips completed" line — Handjet Medium, 25px, centered
   ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
-  ctx.fillText('Clips completed.............................' + totalClips, cx, (209.8 + 25) * sy);
+  ctx.fillText('Clips completed.............................' + totalClips, cx, (251.8 + 25) * sy);
 
   // "Longest streak" line — Handjet Medium, 25px, centered
   ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
-  ctx.fillText('Longest streak..............................' + longestStreak, cx, (237.3 + 25) * sy);
+  ctx.fillText('Longest streak..............................' + longestStreak, cx, (284.8 + 25) * sy);
 }
 
 function isMobile() {
