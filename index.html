@@ -1826,6 +1826,7 @@ document.addEventListener('keydown', (e) => {
 
 // Touch support
 document.addEventListener('touchstart', (e) => {
+  if (e.target.closest('#social-card-wrap')) return;
   e.preventDefault();
   if (gameState === 'start') {
     startGame();
