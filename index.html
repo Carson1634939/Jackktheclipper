@@ -708,8 +708,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 100;
-  background: radial-gradient(ellipse at 50% 60%, rgba(40,10,10,0.4), transparent 70%),
-              linear-gradient(180deg, #0e0e12 0%, #1a0e0e 100%);
+  background: url('./Socialcardpagebackground.jpg') center center / cover no-repeat;
 }
 
 #gameover-screen.active {
@@ -1596,7 +1595,7 @@ function cardPassedWithoutClip(card) {
 
 // ============= SOCIAL CARD =============
 const socialCardImg = new Image();
-socialCardImg.src = './Jacktheclippersocialcardtemplate.png';
+socialCardImg.src = './Jack the clipper template2.jpg';
 
 function renderSocialCard() {
   const canvas = document.getElementById('social-card-canvas');
