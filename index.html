@@ -1053,7 +1053,7 @@ body {
     <div class="go-stats" id="go-stats" style="display:none;"></div>
     <div id="social-card-wrap">
       <canvas id="social-card-canvas"></canvas>
-      <button id="copy-card-btn" onclick="copySocialCard()">COPY CARD</button>
+      <button id="copy-card-btn" onclick="copySocialCard()"><span class="desktop-only">COPY CARD</span><span class="mobile-only">SHARE CARD</span></button>
     </div>
     <div class="restart-prompt">[ <span class="desktop-only">PRESS SPACEBAR</span><span class="mobile-only">TAP</span> TO PLAY AGAIN ]</div>
   </div>
@@ -1635,34 +1635,65 @@ function renderSocialCard() {
   ctx.fillText('Longest streak..............................' + longestStreak, cx, (286.7 + 25) * sy);
 }
 
+function isMobile() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+
+function resetBtnLabel() {
+  const btn = document.getElementById('copy-card-btn');
+  btn.innerHTML = '<span class="desktop-only">COPY CARD</span><span class="mobile-only">SHARE CARD</span>';
+}
+
 function copySocialCard() {
   const canvas = document.getElementById('social-card-canvas');
   const btn = document.getElementById('copy-card-btn');
 
   canvas.toBlob(function(blob) {
-    if (!blob) { btn.textContent = 'FAILED'; return; }
+    if (!blob) { btn.textContent = 'FAILED'; setTimeout(resetBtnLabel, 2000); return; }
 
-    if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
-      navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
-      ]).then(function() {
-        btn.textContent = 'COPIED!';
-        setTimeout(function() { btn.textContent = 'COPY CARD'; }, 2000);
-      }).catch(function() {
-        // Clipboard blocked — open image in new tab so user can long-press to save/copy
-        showImageForManualCopy(blob, btn);
-      });
+    if (isMobile()) {
+      shareSocialCard(blob, btn);
     } else {
-      showImageForManualCopy(blob, btn);
+      copyToClipboard(blob, btn);
     }
   }, 'image/png');
 }
 
-function showImageForManualCopy(blob, btn) {
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-  btn.textContent = 'LONG-PRESS IMAGE TO COPY';
-  setTimeout(function() { btn.textContent = 'COPY CARD'; }, 3000);
+function shareSocialCard(blob, btn) {
+  const file = new File([blob], 'jack-the-clipper-score.png', { type: 'image/png' });
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({
+      title: 'Jack the Clipper',
+      text: 'Check out my score!',
+      files: [file]
+    }).then(function() {
+      btn.textContent = 'SHARED!';
+      setTimeout(resetBtnLabel, 2000);
+    }).catch(function() {
+      // User cancelled or share failed — just reset
+      resetBtnLabel();
+    });
+  } else {
+    // Fallback: copy to clipboard if share not supported
+    copyToClipboard(blob, btn);
+  }
+}
+
+function copyToClipboard(blob, btn) {
+  if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+    navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blob })
+    ]).then(function() {
+      btn.textContent = 'COPIED!';
+      setTimeout(resetBtnLabel, 2000);
+    }).catch(function() {
+      btn.textContent = 'COPY FAILED';
+      setTimeout(resetBtnLabel, 2000);
+    });
+  } else {
+    btn.textContent = 'NOT SUPPORTED';
+    setTimeout(resetBtnLabel, 2000);
+  }
 }
 
 function gameOver() {
