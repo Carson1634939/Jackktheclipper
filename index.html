@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jack the Clipper</title>
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&family=Handjet:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Press+Start+2P&family=Handjet:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1635,45 +1635,42 @@ function cardPassedWithoutClip(card) {
 
 // ============= SOCIAL CARD =============
 const socialCardImg = new Image();
-socialCardImg.src = './Socialcardtemplate.jpg';
+socialCardImg.src = './Jacktheclippersocialcardtemplate.png';
 
 function renderSocialCard() {
   const canvas = document.getElementById('social-card-canvas');
   const ctx = canvas.getContext('2d');
   const img = socialCardImg;
 
-  // Use native image size for crisp rendering
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
+  // Canva design dimensions: 1300 x 900
+  canvas.width = img.naturalWidth || 1300;
+  canvas.height = img.naturalHeight || 900;
 
   // Draw template background
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  // Scale factor (image is ~1300px wide based on screenshots)
-  const w = canvas.width;
-  const h = canvas.height;
+  // Scale factors in case image differs from 1300x900 design
+  const sx = canvas.width / 1300;
+  const sy = canvas.height / 900;
 
-  // Text styling — black, pixel font to match template
   ctx.fillStyle = '#000000';
-
-  // Dollar amount — large, positioned right after the template's "$" sign
-  const dollarSize = Math.round(w * 0.075);
-  ctx.font = `bold ${dollarSize}px 'Press Start 2P', monospace`;
   ctx.textAlign = 'left';
-  const amountText = money.toLocaleString();
-  // The template "$" is at ~x=24%. Draw the number starting just after it
-  ctx.fillText(amountText, w * 0.30, h * 0.215);
 
-  // Stats numbers — right-aligned at the end of the dot leaders
-  const statSize = Math.round(w * 0.025);
-  ctx.font = `bold ${statSize}px 'Press Start 2P', monospace`;
-  ctx.textAlign = 'right';
+  // "TOTAL EARNED" label — Press Start 2P, 46.9px at (275.2, 67.7)
+  ctx.font = `${Math.round(46.9 * sy)}px 'Press Start 2P', monospace`;
+  ctx.fillText('TOTAL EARNED', 275.2 * sx, (67.7 + 46.9) * sy);
 
-  // Clips completed — number at end of dots row
-  ctx.fillText(String(totalClips), w * 0.66, h * 0.305);
+  // Dollar amount — Press Start 2P, 46.9px at (431.3, 159)
+  ctx.font = `${Math.round(46.9 * sy)}px 'Press Start 2P', monospace`;
+  ctx.fillText('$' + money.toLocaleString(), 431.3 * sx, (159 + 46.9) * sy);
 
-  // Longest streak — number at end of dots row
-  ctx.fillText(String(longestStreak), w * 0.66, h * 0.345);
+  // "Clips completed" line — Handjet Medium, 25px at (431.3, 247.4)
+  ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
+  ctx.fillText('Clips completed.......................................' + totalClips, 431.3 * sx, (247.4 + 25) * sy);
+
+  // "Longest streak" line — Handjet Medium, 25px at (431.3, 286.7)
+  ctx.font = `500 ${Math.round(25 * sy)}px 'Handjet', sans-serif`;
+  ctx.fillText('Longest streak........................................' + longestStreak, 431.3 * sx, (286.7 + 25) * sy);
 }
 
 function copySocialCard() {
