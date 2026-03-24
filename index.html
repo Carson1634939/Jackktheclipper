@@ -1569,9 +1569,28 @@ function handleClip() {
     updateStreak();
     jackReact('hit');
   } else {
-    // Pressed at wrong time - no life penalty, just ignore
-    audio.playMiss();
-    showRating('miss');
+    // Pressed too early — find the nearest upcoming card and penalise once
+    let earlyCard = null;
+    let earlyDist = Infinity;
+    const cutY = getCutLineY();
+    for (const card of cards) {
+      if (card.clipped || card.missed) continue;
+      const cw = card.el.querySelector('.clip-window');
+      if (!cw) continue;
+      const cwRect = cw.getBoundingClientRect();
+      const cwCenter = cwRect.top + cwRect.height / 2;
+      // Card is still above / near the cut line (hasn't passed yet)
+      if (cwCenter < cutY) {
+        const d = Math.abs(cutY - cwCenter);
+        if (d < earlyDist) { earlyDist = d; earlyCard = card; }
+      }
+    }
+    if (earlyCard) {
+      earlyCard.missed = true;          // mark so it won't trigger a second miss
+      earlyCard.el.style.opacity = '0.3';
+      earlyCard.el.style.transition = 'opacity 0.3s';
+    }
+    handleMiss();
   }
 }
 
