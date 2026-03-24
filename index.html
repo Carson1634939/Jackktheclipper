@@ -219,7 +219,12 @@ body {
   top: 50%;
   transform: translateY(-50%);
   font-size: 36px;
-  animation: iridescent 3s linear infinite;
+  background: linear-gradient(90deg, #ff0044, #ff8800, #ffff00, #00ff88, #0088ff, #8800ff, #ff00ff, #ff0044);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 100%;
+  animation: iridescentBg 2s linear infinite;
 }
 
 #cut-line::after {
@@ -229,7 +234,12 @@ body {
   top: 50%;
   transform: translateY(-50%) scaleX(-1);
   font-size: 36px;
-  animation: iridescent 3s linear infinite;
+  background: linear-gradient(90deg, #ff0044, #ff8800, #ffff00, #00ff88, #0088ff, #8800ff, #ff00ff, #ff0044);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 100%;
+  animation: iridescentBg 2s linear infinite;
 }
 
 /* Secondary glow lines */
